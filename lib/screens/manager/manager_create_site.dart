@@ -4,16 +4,16 @@ import '../../constants.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/firestore_service.dart';
 import '../../models/user_model.dart';
-import 'owner_site_detail.dart';
+import 'manager_site_detail.dart';
 
-class CreateSiteScreen extends StatefulWidget {
-  const CreateSiteScreen({super.key});
+class ManagerCreateSiteScreen extends StatefulWidget {
+  const ManagerCreateSiteScreen({super.key});
 
   @override
-  State<CreateSiteScreen> createState() => _CreateSiteScreenState();
+  State<ManagerCreateSiteScreen> createState() => _ManagerCreateSiteScreenState();
 }
 
-class _CreateSiteScreenState extends State<CreateSiteScreen> {
+class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _locationController = TextEditingController();
@@ -106,7 +106,7 @@ class _CreateSiteScreenState extends State<CreateSiteScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => OwnerSiteDetailScreen(
+            builder: (_) => ManagerSiteDetailScreen(
               siteId: siteId,
               siteName: _nameController.text.trim(),
             ),

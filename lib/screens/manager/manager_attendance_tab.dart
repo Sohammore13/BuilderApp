@@ -3,15 +3,15 @@ import '../../constants.dart';
 import '../../services/firestore_service.dart';
 import '../../models/user_model.dart';
 
-class OwnerAttendanceTab extends StatefulWidget {
+class ManagerAttendanceTab extends StatefulWidget {
   final String siteId;
-  const OwnerAttendanceTab({super.key, required this.siteId});
+  const ManagerAttendanceTab({super.key, required this.siteId});
 
   @override
-  State<OwnerAttendanceTab> createState() => _OwnerAttendanceTabState();
+  State<ManagerAttendanceTab> createState() => _ManagerAttendanceTabState();
 }
 
-class _OwnerAttendanceTabState extends State<OwnerAttendanceTab> {
+class _ManagerAttendanceTabState extends State<ManagerAttendanceTab> {
   final _firestoreService = FirestoreService();
   bool _loading = true;
 

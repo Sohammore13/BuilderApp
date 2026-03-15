@@ -4,8 +4,7 @@ import '../../constants.dart';
 import '../../services/firestore_service.dart';
 
 class OwnerPurchaseOrdersTab extends StatefulWidget {
-  final String siteId;
-  const OwnerPurchaseOrdersTab({super.key, required this.siteId});
+  const OwnerPurchaseOrdersTab({super.key});
 
   @override
   State<OwnerPurchaseOrdersTab> createState() => _OwnerPurchaseOrdersTabState();
@@ -14,6 +13,7 @@ class OwnerPurchaseOrdersTab extends StatefulWidget {
 class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
   final _firestoreService = FirestoreService();
   final Map<String, String> _userNameCache = {};
+  final Map<String, String> _siteNameCache = {};
 
   Future<String> _getUserName(String uid) async {
     if (_userNameCache.containsKey(uid)) return _userNameCache[uid]!;
@@ -23,10 +23,18 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
     return name;
   }
 
-  Future<void> _updateStatus(String orderId, String status) async {
+  Future<String> _getSiteName(String siteId) async {
+    if (_siteNameCache.containsKey(siteId)) return _siteNameCache[siteId]!;
+    final site = await _firestoreService.getSite(siteId);
+    final name = site?.siteName ?? 'Unknown Site';
+    _siteNameCache[siteId] = name;
+    return name;
+  }
+
+  Future<void> _updateStatus(String siteId, String orderId, String status) async {
     try {
       await _firestoreService.updateOrderStatus(
-        siteId: widget.siteId,
+        siteId: siteId,
         orderId: orderId,
         status: status,
       );
@@ -47,7 +55,7 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
     }
   }
 
-  void _showActionDialog(String orderId, Map<String, dynamic> data) {
+  void _showActionDialog(String siteId, String orderId, Map<String, dynamic> data) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -68,14 +76,14 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _updateStatus(orderId, 'rejected');
+              _updateStatus(siteId, orderId, 'rejected');
             },
             child: const Text('Reject', style: TextStyle(color: AppColors.error)),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              _updateStatus(orderId, 'approved');
+              _updateStatus(siteId, orderId, 'approved');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.success,
@@ -108,7 +116,7 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestoreService.streamPurchaseOrders(widget.siteId),
+      stream: _firestoreService.streamAllPendingPurchaseOrders(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -125,9 +133,9 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.onSurfaceMuted),
+                const Icon(Icons.fact_check_outlined, size: 48, color: AppColors.onSurfaceMuted),
                 const SizedBox(height: 12),
-                Text('No purchase orders yet',
+                Text('No pending approvals across any sites',
                     style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)),
               ],
             ),
@@ -140,6 +148,8 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
           itemBuilder: (context, index) {
             final doc = docs[index];
             final data = doc.data() as Map<String, dynamic>;
+            final siteId = doc.reference.parent.parent!.id;
+            
             final status = data['status'] as String? ?? 'pending';
             final itemName = data['itemName'] as String? ?? '';
             final quantity = data['quantity'] ?? 0;
@@ -147,24 +157,12 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
             final submittedBy = data['submittedBy'] as String? ?? '';
             final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
 
-            Color statusColor;
-            switch (status) {
-              case 'approved':
-                statusColor = AppColors.success;
-                break;
-              case 'rejected':
-                statusColor = AppColors.error;
-                break;
-              default:
-                statusColor = AppColors.warning;
-            }
-
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
                 onTap: status == 'pending'
-                    ? () => _showActionDialog(doc.id, data)
+                    ? () => _showActionDialog(siteId, doc.id, data)
                     : null,
                 child: Container(
                   padding: const EdgeInsets.all(14),
@@ -177,23 +175,39 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
-                            child: Text(
-                              itemName,
-                              style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                            child: FutureBuilder<String>(
+                              future: _getSiteName(siteId),
+                              builder: (ctx, siteSnap) {
+                                final sName = siteSnap.data ?? 'Loading...';
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      itemName,
+                                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                                    ),
+                                    Text(
+                                      sName,
+                                      style: AppTextStyles.caption.copyWith(color: AppColors.primary),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.12),
+                              color: AppColors.warning.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              status.toUpperCase(),
+                              'PENDING APPROVAL',
                               style: AppTextStyles.caption.copyWith(
-                                color: statusColor,
+                                color: AppColors.warning,
                                 fontWeight: FontWeight.w700,
                                 fontSize: 11,
                               ),
@@ -201,7 +215,7 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           _infoChip(Icons.inventory_2_outlined, 'Qty: $quantity'),

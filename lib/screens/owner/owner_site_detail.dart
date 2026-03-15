@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../../constants.dart';
 import 'owner_attendance_tab.dart';
 import 'owner_announcements_tab.dart';
-import 'owner_purchase_orders_tab.dart';
-import 'edit_members_screen.dart';
+import '../manager/manager_material_requests_tab.dart'; // Read-only single-site PO view
 
 class OwnerSiteDetailScreen extends StatelessWidget {
   final String siteId;
@@ -25,6 +24,10 @@ class OwnerSiteDetailScreen extends StatelessWidget {
           backgroundColor: AppColors.surface,
           foregroundColor: AppColors.onSurface,
           elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           title: Row(
             children: [
               Container(
@@ -50,24 +53,7 @@ class OwnerSiteDetailScreen extends StatelessWidget {
               ),
             ],
           ),
-          actions: [
-            Tooltip(
-              message: 'Edit Members',
-              child: IconButton(
-                icon: const Icon(Icons.group_outlined),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => EditMembersScreen(
-                        siteId: siteId,
-                        siteName: siteName,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+          // Notice: Actions removed for Owner (No Edit Members)
           bottom: TabBar(
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.onSurfaceMuted,
@@ -86,7 +72,7 @@ class OwnerSiteDetailScreen extends StatelessWidget {
           children: [
             OwnerAttendanceTab(siteId: siteId),
             OwnerAnnouncementsTab(siteId: siteId),
-            OwnerPurchaseOrdersTab(siteId: siteId),
+            ManagerMaterialRequestsTab(siteId: siteId),
           ],
         ),
       ),

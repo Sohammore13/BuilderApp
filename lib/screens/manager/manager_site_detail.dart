@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../constants.dart';
-import 'purchase_orders_tab.dart';
-import 'purchase_announcements_tab.dart';
-import 'purchase_attendance_tab.dart';
+import 'manager_attendance_tab.dart';
+import 'manager_announcements_tab.dart';
+import 'manager_material_requests_tab.dart';
+import 'manager_edit_members_tab.dart';
 
-class PurchaseSiteDetailScreen extends StatelessWidget {
+class ManagerSiteDetailScreen extends StatelessWidget {
   final String siteId;
   final String siteName;
 
-  const PurchaseSiteDetailScreen({
+  const ManagerSiteDetailScreen({
     super.key,
     required this.siteId,
     required this.siteName,
@@ -35,7 +36,7 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
                 height: 32,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [AppColors.success, Color(0xFF66BB6A)],
+                    colors: [AppColors.primary, AppColors.primaryLight],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -53,25 +54,43 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
               ),
             ],
           ),
+          actions: [
+            Tooltip(
+              message: 'Edit Members',
+              child: IconButton(
+                icon: const Icon(Icons.group_outlined),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ManagerEditMembersScreen(
+                        siteId: siteId,
+                        siteName: siteName,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
           bottom: TabBar(
-            labelColor: AppColors.success,
+            labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.onSurfaceMuted,
-            indicatorColor: AppColors.success,
+            indicatorColor: AppColors.primary,
             indicatorWeight: 3,
             labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 13),
             tabs: const [
-              Tab(icon: Icon(Icons.receipt_long_outlined, size: 20), text: 'Orders'),
-              Tab(icon: Icon(Icons.campaign_outlined, size: 20), text: 'Announcements'),
               Tab(icon: Icon(Icons.how_to_reg_outlined, size: 20), text: 'Attendance'),
+              Tab(icon: Icon(Icons.campaign_outlined, size: 20), text: 'Announcements'),
+              Tab(icon: Icon(Icons.receipt_long_outlined, size: 20), text: 'Orders'),
             ],
           ),
         ),
         body: TabBarView(
           children: [
-            PurchaseOrdersTab(siteId: siteId),
-            PurchaseAnnouncementsTab(siteId: siteId),
-            PurchaseAttendanceTab(siteId: siteId),
+            ManagerAttendanceTab(siteId: siteId),
+            ManagerAnnouncementsTab(siteId: siteId),
+            ManagerMaterialRequestsTab(siteId: siteId),
           ],
         ),
       ),

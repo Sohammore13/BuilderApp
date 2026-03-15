@@ -429,6 +429,15 @@ class FirestoreService {
         .snapshots();
   }
 
+  /// Stream ALL pending purchase orders across ALL sites (for Owner Approvals)
+  Stream<QuerySnapshot> streamAllPendingPurchaseOrders() {
+    return _db
+        .collectionGroup('orders')
+        .where('status', isEqualTo: 'pending')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
   /// Stream purchase orders submitted by a specific user
   Stream<QuerySnapshot> streamMyPurchaseOrders({
     required String siteId,

@@ -5,17 +5,17 @@ import '../../widgets/common_widgets.dart';
 import '../../services/firestore_service.dart';
 import '../../models/site_model.dart';
 import '../../services/auth_service.dart';
-import 'owner_site_detail.dart';
-import 'owner_purchase_orders_tab.dart';
+import 'manager_create_site.dart';
+import 'manager_site_detail.dart';
 
-class OwnerDashboard extends StatefulWidget {
-  const OwnerDashboard({super.key});
+class ManagerDashboard extends StatefulWidget {
+  const ManagerDashboard({super.key});
 
   @override
-  State<OwnerDashboard> createState() => _OwnerDashboardState();
+  State<ManagerDashboard> createState() => _ManagerDashboardState();
 }
 
-class _OwnerDashboardState extends State<OwnerDashboard> {
+class _ManagerDashboardState extends State<ManagerDashboard> {
   int _currentIndex = 0;
 
   @override
@@ -23,17 +23,18 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final firestoreService = FirestoreService();
 
+    // Reusing the site stream from owner for manager since manager has full access
     final _pages = [
-      // Tab 1: Purchase Approvals (Global)
-      const OwnerPurchaseOrdersTab(), // No siteId needed, it's global now
-      // Tab 2: View Sites (Read Only)
-      _ViewSitesTab(firestoreService: firestoreService, uid: uid),
+      // Tab 1: My Sites
+      _MySitesTab(firestoreService: firestoreService, uid: uid),
+      // Tab 2: Create Site
+      const ManagerCreateSiteScreen(),
     ];
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Owner Dashboard'),
+        title: const Text('Manager Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -44,17 +45,22 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
       body: _pages[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        onDestinationSelected: (index) {
+          // Instead of rendering creating site inside a tab, we could push it
+          // OR we can make it a tab. The user requested: "Tab 2: Create Site button"
+          // We will render it as a tab page.
+          setState(() => _currentIndex = index);
+        },
         destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.fact_check_outlined),
-            selectedIcon: Icon(Icons.fact_check),
-            label: 'Approvals',
-          ),
           NavigationDestination(
             icon: Icon(Icons.business_outlined),
             selectedIcon: Icon(Icons.business),
-            label: 'View Sites',
+            label: 'My Sites',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.add_location_alt_outlined),
+            selectedIcon: Icon(Icons.add_location_alt),
+            label: 'Create Site',
           ),
         ],
       ),
@@ -62,11 +68,11 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
   }
 }
 
-class _ViewSitesTab extends StatelessWidget {
+class _MySitesTab extends StatelessWidget {
   final FirestoreService firestoreService;
   final String uid;
 
-  const _ViewSitesTab({required this.firestoreService, required this.uid});
+  const _MySitesTab({required this.firestoreService, required this.uid});
 
   @override
   Widget build(BuildContext context) {
@@ -79,37 +85,37 @@ class _ViewSitesTab extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.warning.withValues(alpha: 0.1), AppColors.warning.withValues(alpha: 0.02)],
+                colors: [AppColors.success.withValues(alpha: 0.1), AppColors.success.withValues(alpha: 0.02)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.warning.withValues(alpha: 0.15)),
+              border: Border.all(color: AppColors.success.withValues(alpha: 0.15)),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.15),
+                    color: AppColors.success.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.warning, size: 28),
+                  child: const Icon(Icons.verified_user_outlined, color: AppColors.success, size: 28),
                 ),
                 const SizedBox(width: 16),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Owner View', style: AppTextStyles.h3.copyWith(color: AppColors.warning)),
+                    Text('Welcome, Manager!', style: AppTextStyles.h3.copyWith(color: AppColors.success)),
                     const SizedBox(height: 2),
-                    Text('Read-only access to all sites', style: AppTextStyles.caption),
+                    Text('Manage assigned sites', style: AppTextStyles.caption),
                   ],
                 ),
               ],
             ),
           ),
           const SizedBox(height: 28),
-          const SectionHeader(title: 'All Sites'),
+          const SectionHeader(title: 'My Sites'),
           StreamBuilder<List<SiteModel>>(
             stream: firestoreService.streamSitesForOwner(uid),
             builder: (context, snapshot) {
@@ -138,9 +144,9 @@ class _ViewSitesTab extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 40),
                     child: Column(
                       children: [
-                        const Icon(Icons.business_outlined, size: 48, color: AppColors.onSurfaceMuted),
+                        const Icon(Icons.add_location_alt_outlined, size: 48, color: AppColors.onSurfaceMuted),
                         const SizedBox(height: 12),
-                        Text('No sites created by managers yet.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)),
+                        Text('No sites yet. Go to Create Site tab!', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)),
                       ],
                     ),
                   ),
@@ -172,7 +178,7 @@ class _SiteCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => OwnerSiteDetailScreen(siteId: site.siteId, siteName: site.siteName),
+              builder: (_) => ManagerSiteDetailScreen(siteId: site.siteId, siteName: site.siteName),
             ),
           );
         },

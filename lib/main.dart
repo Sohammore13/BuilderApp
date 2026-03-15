@@ -7,6 +7,7 @@ import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/owner/owner_dashboard.dart';
+import 'screens/manager/manager_dashboard.dart';
 import 'screens/site_engineer/engineer_dashboard.dart';
 import 'screens/purchase_team/purchase_dashboard.dart';
 
@@ -78,6 +79,7 @@ class BuilderApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/register': (context) => const RegisterScreen(),
         '/owner': (context) => const OwnerDashboard(),
+        '/manager': (context) => const ManagerDashboard(),
         '/engineer': (context) => const EngineerDashboard(),
         '/purchase': (context) => const PurchaseDashboard(),
       },
@@ -124,6 +126,15 @@ class _AuthWrapperState extends State<AuthWrapper> {
     if (user.uid == kOwnerUID) {
       nav.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const OwnerDashboard()),
+        (route) => false,
+      );
+      return;
+    }
+
+    // ── Manager (UID shortcut) ───────────────────────────────────────────────
+    if (user.uid == kManagerUID) {
+      nav.pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const ManagerDashboard()),
         (route) => false,
       );
       return;

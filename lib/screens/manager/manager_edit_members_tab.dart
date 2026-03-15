@@ -4,21 +4,21 @@ import '../../services/firestore_service.dart';
 import '../../models/user_model.dart';
 import '../../models/site_model.dart';
 
-class EditMembersScreen extends StatefulWidget {
+class ManagerEditMembersScreen extends StatefulWidget {
   final String siteId;
   final String siteName;
 
-  const EditMembersScreen({
+  const ManagerEditMembersScreen({
     super.key,
     required this.siteId,
     required this.siteName,
   });
 
   @override
-  State<EditMembersScreen> createState() => _EditMembersScreenState();
+  State<ManagerEditMembersScreen> createState() => _ManagerEditMembersScreenState();
 }
 
-class _EditMembersScreenState extends State<EditMembersScreen> {
+class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
   final _firestoreService = FirestoreService();
 
   bool _loadingUsers = true;

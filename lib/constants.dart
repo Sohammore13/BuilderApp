@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 // IMPORTANT: Replace the placeholder below with the actual Firebase UID of
 // the pre-created Owner account before releasing the app.
 const String kOwnerUID = 'X7UjcFVXxLdfakc467oMDIxKmvM2';
+const String kManagerUID = 'mIOUPGFWMNZf77nfc4LYRsprMEn2';
 
 // ---------------------------------------------------------------------------
 // Firestore collection / field names
@@ -17,6 +18,7 @@ const String kUsersCollection = 'users';
 const String kRoleOwner = 'owner';
 const String kRoleSiteEngineer = 'site_engineer';
 const String kRolePurchaseTeam = 'purchase_team';
+const String kRoleManager = 'manager';
 
 // ---------------------------------------------------------------------------
 // Color palette  (Deep Navy + Safety Orange for a commercial look)

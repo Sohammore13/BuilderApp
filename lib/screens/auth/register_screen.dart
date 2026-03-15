@@ -22,7 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   String? _errorMessage;
 
-  // Role options — owner is intentionally excluded
+  // Role options — owner and manager are intentionally excluded
   String _selectedRole = kRoleSiteEngineer;
   final List<Map<String, String>> _roles = [
     {'value': kRoleSiteEngineer, 'label': 'Site Engineer'},
