@@ -10,6 +10,7 @@ import 'screens/owner/owner_dashboard.dart';
 import 'screens/manager/manager_dashboard.dart';
 import 'screens/site_engineer/engineer_dashboard.dart';
 import 'screens/purchase_team/purchase_dashboard.dart';
+import 'screens/splash_screen.dart';
 
 // Global navigator key — lets AuthWrapper navigate imperatively from the stream
 final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
@@ -83,7 +84,7 @@ class BuilderApp extends StatelessWidget {
         '/engineer': (context) => const EngineerDashboard(),
         '/purchase': (context) => const PurchaseDashboard(),
       },
-      home: const AuthWrapper(),
+      home: const SplashScreen(),
     );
   }
 }
@@ -191,30 +192,10 @@ class _SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 90,
-              height: 90,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.accentLight, AppColors.accent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(26),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.accent.withValues(alpha: 0.3),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.construction, color: Colors.white, size: 44),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'BuilderPro',
-              style: AppTextStyles.h1,
+            Image.asset(
+              'assets/images/logo.jpg',
+              width: 180,
+              fit: BoxFit.contain,
             ),
             const SizedBox(height: 40),
             const SizedBox(

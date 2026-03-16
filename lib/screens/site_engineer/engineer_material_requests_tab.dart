@@ -7,6 +7,7 @@ import '../../constants.dart';
 import '../../services/firestore_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/cloudinary_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class EngineerMaterialRequestsTab extends StatefulWidget {
   final String siteId;
@@ -180,18 +181,10 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
               child: Column(
                 children: [
                   if (_selectedImageBytes == null)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                        ),
-                        icon: const Icon(Icons.add_photo_alternate, color: Colors.white),
-                        label: Text('New Request', style: AppTextStyles.button),
-                        onPressed: _showImagePickerOptions,
-                      ),
+                    PrimaryButton(
+                      icon: Icons.add_photo_alternate,
+                      label: 'New Request',
+                      onPressed: _showImagePickerOptions,
                     )
                   else ...[
                     // Preview
@@ -218,19 +211,12 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                     ),
                     const SizedBox(height: 12),
                     if (_isUploading)
-                      const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary))
+                      const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)))
                     else
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.success,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          ),
-                          onPressed: _submitRequest,
-                          child: Text('Submit Request', style: AppTextStyles.button),
-                        ),
+                      PrimaryButton(
+                        onPressed: _submitRequest,
+                        label: 'Submit Request',
+                        color: AppColors.success,
                       ),
                   ],
                 ],
@@ -250,7 +236,14 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                     return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
                   }
 
-                  final docs = snapshot.data?.docs ?? [];
+                  final docs = (snapshot.data?.docs ?? []).toList();
+                  docs.sort((a, b) {
+                    final aTime = (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+                    final bTime = (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+                    if (aTime == null || bTime == null) return 0;
+                    return bTime.compareTo(aTime);
+                  });
+
                   if (docs.isEmpty) {
                     return Center(child: Text('No material requests submitted yet.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)));
                   }

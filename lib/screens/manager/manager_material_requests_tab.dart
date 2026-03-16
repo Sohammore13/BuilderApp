@@ -16,33 +16,53 @@ class ManagerMaterialRequestsTab extends StatefulWidget {
 class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab> {
   final _firestoreService = FirestoreService();
 
-  void _viewImage(String url) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
+  Future<void> _viewFile(String url) async {
+    final uri = Uri.parse(url);
+    if (url.toLowerCase().endsWith('.pdf') || url.contains('/raw/upload')) {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open PDF. Please check your browser.')),
+          );
+        }
+      }
+    } else {
+      if (!mounted) return;
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => Scaffold(
           backgroundColor: Colors.black,
-          iconTheme: const IconThemeData(color: Colors.white),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.white),
-            onPressed: () => Navigator.of(context).pop(),
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.white),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              child: Image.network(
+                url,
+                errorBuilder: (context, error, stackTrace) => const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.white, size: 40),
+                    SizedBox(height: 12),
+                    Text('Failed to load image', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        body: Center(child: InteractiveViewer(child: Image.network(url))),
-      ),
-    ));
-  }
-
-  Future<void> _viewPdf(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open PDF'), backgroundColor: AppColors.error),
-        );
-      }
+      ));
     }
   }
+
+  void _viewImage(String url) => _viewFile(url);
+
 
   Color _getStatusColor(String status) {
     switch (status) {
@@ -63,7 +83,13 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
           return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
         }
 
-        final docs = snapshot.data?.docs ?? [];
+        final docs = (snapshot.data?.docs ?? []).toList();
+        docs.sort((a, b) {
+          final aTime = (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+          final bTime = (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+          if (aTime == null || bTime == null) return 0;
+          return bTime.compareTo(aTime);
+        });
 
         if (docs.isEmpty) {
           return Center(
@@ -132,12 +158,16 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                             child: Text(status.replaceAll('_', ' ').toUpperCase(), 
                               style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
                           ),
+                          if (data['quotationNote'] != null && (data['quotationNote'] as String).isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Text('Note: ${data['quotationNote']}', style: AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic)),
+                          ],
                           if (pdfUrl != null) ...[
                             const SizedBox(height: 8),
                             TextButton.icon(
-                              onPressed: () => _viewPdf(pdfUrl),
-                              icon: const Icon(Icons.picture_as_pdf, size: 18),
-                              label: const Text('View PDF'),
+                              onPressed: () => _viewFile(pdfUrl),
+                              icon: const Icon(Icons.description, size: 18),
+                              label: const Text('View Quotation'),
                               style: TextButton.styleFrom(
                                 foregroundColor: AppColors.primary,
                                 padding: EdgeInsets.zero,

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class OwnerPurchaseOrdersTab extends StatefulWidget {
   const OwnerPurchaseOrdersTab({super.key});
@@ -73,48 +74,77 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
           maxLines: 3,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-          ElevatedButton(
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.onSurfaceMuted)),
+          ),
+          const SizedBox(width: 8),
+          PrimaryButton(
+            label: 'Reject',
             onPressed: () {
               if (controller.text.trim().isEmpty) return;
               Navigator.pop(ctx);
               _updateStatus(siteId, requestId, 'rejected', reason: controller.text.trim());
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-            child: const Text('Reject', style: TextStyle(color: Colors.white)),
+            color: AppColors.error,
+            isFullWidth: false,
+            height: 40,
           ),
         ],
       ),
     );
   }
 
-  void _viewImage(String url) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
+  Future<void> _viewFile(String url) async {
+    final uri = Uri.parse(url);
+    if (url.toLowerCase().endsWith('.pdf') || url.contains('/raw/upload')) {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open PDF. Please check your browser.')),
+          );
+        }
+      }
+    } else {
+      // It's an image, use the internal viewer
+      if (!mounted) return;
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => Scaffold(
           backgroundColor: Colors.black,
-          iconTheme: const IconThemeData(color: Colors.white),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, size: 20),
-            onPressed: () => Navigator.of(context).pop(),
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, size: 20),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              child: Image.network(
+                url,
+                errorBuilder: (context, error, stackTrace) => const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.white, size: 40),
+                    SizedBox(height: 12),
+                    Text('Failed to load image', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
-        body: Center(child: InteractiveViewer(child: Image.network(url))),
-      ),
-    ));
-  }
-
-  Future<void> _viewPdf(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open PDF'), backgroundColor: AppColors.error),
-        );
-      }
+      ));
     }
   }
+
+  void _viewImage(String url) => _viewFile(url); // Keep for compatibility if needed elsewhere
+
+
+  // _viewPdf is removed because we now use images
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +155,13 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
           return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
         }
 
-        final allDocs = snapshot.data?.docs ?? [];
+        final allDocs = (snapshot.data?.docs ?? []).toList();
+        allDocs.sort((a, b) {
+          final aTime = (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+          final bTime = (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+          if (aTime == null || bTime == null) return 0;
+          return bTime.compareTo(aTime);
+        });
         final pendingDocs = allDocs.where((d) => (d.data() as Map<String, dynamic>)['status'] == 'pending_approval').toList();
         final historyDocs = allDocs.where((d) => ['approved', 'rejected'].contains((d.data() as Map<String, dynamic>)['status'])).toList();
 
@@ -211,6 +247,21 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                 _statusBadge(status),
               ],
             ),
+            if (data['quotationNote'] != null && (data['quotationNote'] as String).isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(8)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Purchase Remark:', style: AppTextStyles.label.copyWith(fontSize: 11)),
+                    Text(data['quotationNote'], style: AppTextStyles.body.copyWith(fontSize: 13)),
+                  ],
+                ),
+              ),
+            ],
             if (status == 'rejected' && rejectionReason != null) ...[
               const SizedBox(height: 10),
               Text('Rejection Reason: $rejectionReason', style: AppTextStyles.caption.copyWith(color: AppColors.error)),
@@ -220,43 +271,43 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
               children: [
                 if (imageUrl != null)
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _viewImage(imageUrl),
-                      icon: const Icon(Icons.image, size: 16),
-                      label: const Text('View Image'),
-                      style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                    child: SecondaryButton(
+                      onPressed: () => _viewFile(imageUrl),
+                      icon: Icons.image,
+                      label: 'View Requirement',
+                      isFullWidth: false,
                     ),
                   ),
                 if (pdfUrl != null) ...[
                   const SizedBox(width: 8),
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _viewPdf(pdfUrl),
-                      icon: const Icon(Icons.picture_as_pdf, size: 16),
-                      label: const Text('View PDF'),
-                      style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                    child: SecondaryButton(
+                      onPressed: () => _viewFile(pdfUrl),
+                      icon: Icons.description,
+                      label: 'View Quotation',
+                      isFullWidth: false,
                     ),
                   ),
                 ],
               ],
             ),
             if (isPending) ...[
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: PrimaryButton(
                       onPressed: () => _updateStatus(siteId, doc.id, 'approved'),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.white),
-                      child: const Text('Approve'),
+                      label: 'Approve',
+                      color: AppColors.success,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
+                    child: PrimaryButton(
                       onPressed: () => _showRejectionDialog(siteId, doc.id),
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
-                      child: const Text('Reject'),
+                      label: 'Reject',
+                      color: AppColors.error,
                     ),
                   ),
                 ],

@@ -3,6 +3,7 @@ import '../../constants.dart';
 import '../../services/firestore_service.dart';
 import '../../models/user_model.dart';
 import '../../models/site_model.dart';
+import '../../widgets/common_widgets.dart';
 
 class ManagerEditMembersScreen extends StatefulWidget {
   final String siteId;
@@ -242,21 +243,10 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
                           ),
                           const SizedBox(height: 10),
                           if (_toAddEngineers.isNotEmpty)
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                icon: const Icon(Icons.person_add_outlined, size: 18),
-                                label: Text(
-                                    'Add ${_toAddEngineers.length} Selected Engineer${_toAddEngineers.length > 1 ? 's' : ''}'),
-                                onPressed: _saving ? null : _addSelectedEngineers,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 13),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                ),
-                              ),
+                            PrimaryButton(
+                              icon: Icons.person_add_outlined,
+                              label: 'Add ${_toAddEngineers.length} Selected Engineer${_toAddEngineers.length > 1 ? "s" : ""}',
+                              onPressed: _saving ? null : _addSelectedEngineers,
                             ),
                         ],
 
@@ -298,21 +288,11 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
                           ),
                           const SizedBox(height: 10),
                           if (_toAddPurchase.isNotEmpty)
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton.icon(
-                                icon: const Icon(Icons.group_add_outlined, size: 18),
-                                label: Text(
-                                    'Add ${_toAddPurchase.length} Selected Member${_toAddPurchase.length > 1 ? 's' : ''}'),
-                                onPressed: _saving ? null : _addSelectedPurchase,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.success,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 13),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                ),
-                              ),
+                            PrimaryButton(
+                              icon: Icons.group_add_outlined,
+                              label: 'Add ${_toAddPurchase.length} Selected Member${_toAddPurchase.length > 1 ? "s" : ""}',
+                              onPressed: _saving ? null : _addSelectedPurchase,
+                              color: AppColors.success,
                             ),
                         ],
 

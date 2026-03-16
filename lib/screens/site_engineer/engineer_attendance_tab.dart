@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class EngineerAttendanceTab extends StatefulWidget {
   final String siteId;
@@ -135,28 +136,12 @@ class _EngineerAttendanceTabState extends State<EngineerAttendanceTab> {
                 Text(_todayStr, style: AppTextStyles.caption),
                 if (!_markedToday) ...[
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      onPressed: _marking ? null : _markPresent,
-                      icon: _marking
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                              ),
-                            )
-                          : const Icon(Icons.check),
-                      label: Text(_marking ? 'Marking...' : 'Mark Present'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.success,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
+                  PrimaryButton(
+                    onPressed: _markPresent,
+                    isLoading: _marking,
+                    icon: Icons.check,
+                    label: 'Mark Present',
+                    color: AppColors.success,
                   ),
                 ],
               ],

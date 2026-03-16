@@ -6,6 +6,7 @@ import '../../constants.dart';
 import '../../services/firestore_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/cloudinary_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class PurchaseRequestDetailScreen extends StatefulWidget {
   final String siteId;
@@ -27,32 +28,40 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
   final CloudinaryService _cloudinaryService = CloudinaryService();
+  final TextEditingController _noteController = TextEditingController();
 
   bool _isUploading = false;
-  Uint8List? _selectedPdfBytes;
+  Uint8List? _selectedImageBytes;
   String? _selectedFilename;
 
   String get _status => widget.requestData['status'] as String? ?? 'pending_quotation';
   String get _imageUrl => widget.requestData['requestImageURL'] as String? ?? '';
-  String? get _pdfUrl => widget.requestData['purchaseOrderPdfURL'] as String?;
+  String? get _quotationUrl => widget.requestData['purchaseOrderPdfURL'] as String?;
+  String? get _existingNote => widget.requestData['quotationNote'] as String?;
 
-  Future<void> _pickPdf() async {
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf'],
+      allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
       withData: true, // Necessary for Web
     );
 
     if (result != null && result.files.single.bytes != null) {
       setState(() {
-        _selectedPdfBytes = result.files.single.bytes;
+        _selectedImageBytes = result.files.single.bytes;
         _selectedFilename = result.files.single.name;
       });
     }
   }
 
-  Future<void> _uploadPdf() async {
-    if (_selectedPdfBytes == null) return;
+  Future<void> _uploadQuotation() async {
+    if (_selectedImageBytes == null) return;
 
     final user = _authService.currentUser;
     if (user == null) return;
@@ -60,26 +69,37 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
     setState(() => _isUploading = true);
 
     try {
-      final String? pdfUrl = await _cloudinaryService.uploadPDF(
-        _selectedPdfBytes!,
-        _selectedFilename ?? 'quotation_${DateTime.now().millisecondsSinceEpoch}.pdf',
-      );
+      String? fileUrl;
+      final bool isPdf = _selectedFilename?.toLowerCase().endsWith('.pdf') ?? false;
+
+      if (isPdf) {
+        fileUrl = await _cloudinaryService.uploadPDF(
+          _selectedImageBytes!,
+          _selectedFilename!,
+        );
+      } else {
+        fileUrl = await _cloudinaryService.uploadImage(
+          _selectedImageBytes!,
+          _selectedFilename ?? 'quotation_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+      }
       
-      if (pdfUrl == null) {
-        throw Exception("Failed to upload PDF to Cloudinary.");
+      if (fileUrl == null) {
+        throw Exception("Failed to upload file to Cloudinary.");
       }
 
       await _firestoreService.uploadPurchaseOrderPdf(
         siteId: widget.siteId,
         requestId: widget.requestId,
-        pdfUrl: pdfUrl,
+        pdfUrl: fileUrl,
         uploadedBy: user.uid,
+        quotationNote: _noteController.text.trim(),
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Purchase Order PDF uploaded successfully!'),
+            content: Text('Quotation submitted successfully!'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -101,15 +121,51 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
     }
   }
 
-  Future<void> _launchPdfUrl() async {
-    if (_pdfUrl == null) return;
-    final Uri url = Uri.parse(_pdfUrl!);
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text('Could not open PDF.'), backgroundColor: AppColors.error),
-        );
+  Future<void> _viewQuotation(String url) async {
+    final uri = Uri.parse(url);
+    final bool isPdf = url.toLowerCase().endsWith('.pdf') || url.contains('/raw/upload');
+
+    if (isPdf) {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open PDF. Please check your browser.')),
+          );
+        }
       }
+    } else {
+      if (!mounted) return;
+      Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, size: 20),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            title: const Text('Quotation Preview', style: TextStyle(color: Colors.white, fontSize: 16)),
+          ),
+          body: Center(
+            child: InteractiveViewer(
+              child: Image.network(
+                url,
+                errorBuilder: (context, error, stackTrace) => const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.white, size: 40),
+                    SizedBox(height: 12),
+                    Text('Failed to load quotation image', style: TextStyle(color: Colors.white)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
     }
   }
 
@@ -140,7 +196,7 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
           icon: const Icon(Icons.arrow_back_ios, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: const Text('Material Request Detail', style: TextStyle(fontSize: 18)),
+        title: const Text('Requirement Details', style: TextStyle(fontSize: 18)),
       ),
       body: Stack(
         children: [
@@ -192,15 +248,23 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                       const SizedBox(height: 20),
 
                       if (_status == 'pending_quotation') ...[
-                        ElevatedButton.icon(
-                          onPressed: _pickPdf,
-                          icon: const Icon(Icons.picture_as_pdf),
-                          label: const Text('Upload Purchase Order PDF'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryLight,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                        TextField(
+                          controller: _noteController,
+                          decoration: InputDecoration(
+                            hintText: 'Add a remark (e.g. Dealer name)...',
+                            hintStyle: AppTextStyles.caption,
+                            filled: true,
+                            fillColor: AppColors.background,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                           ),
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 12),
+                        SecondaryButton(
+                          onPressed: _pickFile,
+                          icon: Icons.upload_file,
+                          label: 'Attach Quotation (Imge or PDF)',
+                          color: AppColors.primaryLight,
                         ),
                         if (_selectedFilename != null) ...[
                           const SizedBox(height: 10),
@@ -209,31 +273,27 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 10),
-                          ElevatedButton.icon(
-                            onPressed: _uploadPdf,
-                            icon: const Icon(Icons.send),
-                            label: const Text('Submit to Owner'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
+                          PrimaryButton(
+                            onPressed: _uploadQuotation,
+                            icon: Icons.send,
+                            label: 'Send to Owner for Approval',
                           ),
                         ]
                       ] else ...[
-                        if (_pdfUrl != null)
-                          ElevatedButton.icon(
-                            onPressed: _launchPdfUrl,
-                            icon: const Icon(Icons.open_in_new),
-                            label: const Text('View Purchase Order PDF'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
+                        if (_existingNote != null && _existingNote!.isNotEmpty) ...[
+                          Text('Remark:', style: AppTextStyles.label),
+                          Text(_existingNote!, style: AppTextStyles.body),
+                          const SizedBox(height: 12),
+                        ],
+                        if (_quotationUrl != null)
+                          PrimaryButton(
+                            onPressed: () => _viewQuotation(_quotationUrl!),
+                            icon: Icons.description,
+                            label: 'View Quotation',
+                            height: 56,
                           ),
-                        if (_pdfUrl == null)
-                          Text('No PDF attached.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted), textAlign: TextAlign.center),
+                        if (_quotationUrl == null)
+                          Text('No Quotation attached.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted), textAlign: TextAlign.center),
                       ],
                     ],
                   ),

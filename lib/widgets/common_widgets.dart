@@ -33,18 +33,14 @@ class BuilderAppBar extends StatelessWidget implements PreferredSizeWidget {
       titleSpacing: Navigator.of(context).canPop() ? 0 : null,
       title: Row(
         children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.accentLight, AppColors.accent],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.asset(
+              'assets/images/logo.jpg',
+              width: 30,
+              height: 30,
+              fit: BoxFit.cover,
             ),
-            child: const Icon(Icons.construction, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 10),
           Text(
@@ -319,6 +315,9 @@ class PrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isLoading;
   final IconData? icon;
+  final Color? color;
+  final double? height;
+  final bool isFullWidth;
 
   const PrimaryButton({
     super.key,
@@ -326,21 +325,25 @@ class PrimaryButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.icon,
+    this.color,
+    this.height,
+    this.isFullWidth = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
-      height: 52,
+      width: isFullWidth ? double.infinity : null,
+      height: height ?? 52,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: (isLoading || onPressed == null) ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: color ?? AppColors.primary,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          disabledBackgroundColor: (color ?? AppColors.primary).withValues(alpha: 0.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
         child: isLoading
             ? const SizedBox(
@@ -352,19 +355,84 @@ class PrimaryButton extends StatelessWidget {
                 ),
               )
             : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (icon != null) ...[
                     Icon(icon, size: 20),
                     const SizedBox(width: 8),
                   ],
-                  Text(
-                    label,
-                    style: AppTextStyles.button,
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.button,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
       ),
     );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Secondary / Outlined button
+// ---------------------------------------------------------------------------
+class SecondaryButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final IconData? icon;
+  final Color? color;
+  final double? height;
+  final bool isFullWidth;
+
+  const SecondaryButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.color,
+    this.height,
+    this.isFullWidth = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final themeColor = color ?? AppColors.primary;
+    final button = OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: themeColor,
+        side: BorderSide(color: themeColor.withValues(alpha: 0.5)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        minimumSize: Size(0, height ?? 50),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 18),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: Text(
+              label,
+              style: AppTextStyles.button.copyWith(color: themeColor, fontSize: 14),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (isFullWidth) {
+      return SizedBox(width: double.infinity, height: height ?? 52, child: button);
+    }
+    return button;
   }
 }

@@ -98,38 +98,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     Center(
                       child: Column(
                         children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [AppColors.accentLight, AppColors.accent],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accent.withValues(alpha: 0.25),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.construction,
-                              color: Colors.white,
-                              size: 40,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            'BuilderPro',
-                            style: AppTextStyles.h1.copyWith(
-                              color: AppColors.onSurface,
-                              fontSize: 32,
-                              letterSpacing: -1,
-                            ),
+                          Image.asset(
+                            'assets/images/logo.jpg',
+                            width: 220,
+                            fit: BoxFit.contain,
                           ),
                           const SizedBox(height: 6),
                           Text(

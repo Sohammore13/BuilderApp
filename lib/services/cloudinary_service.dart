@@ -2,6 +2,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:http_parser/http_parser.dart';
+
 // 1. Go to cloudinary.com and create free account
 // 2. Dashboard → Settings → Upload → Add upload preset
 // 3. Set preset as "Unsigned"
@@ -38,19 +40,29 @@ class CloudinaryService {
 
   Future<String?> uploadPDF(Uint8List pdfBytes, String fileName) async {
     try {
+      // For raw files like PDFs, Cloudinary requires the /raw/upload endpoint.
       final url = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/raw/upload');
+      
+      // Ensure the filename has a .pdf extension
+      final String finalFileName = fileName.toLowerCase().endsWith('.pdf') 
+          ? fileName 
+          : '$fileName.pdf';
+
       final request = http.MultipartRequest('POST', url)
         ..fields['upload_preset'] = uploadPreset
         ..files.add(http.MultipartFile.fromBytes(
           'file',
           pdfBytes,
-          filename: fileName,
+          filename: finalFileName,
+          contentType: MediaType('application', 'pdf'),
         ));
 
       final response = await request.send();
       if (response.statusCode == 200) {
         final responseData = await response.stream.bytesToString();
         final jsonResult = json.decode(responseData);
+        
+        // Return the secure URL exactly as Cloudinary provides it
         return jsonResult['secure_url'];
       } else {
         return null;

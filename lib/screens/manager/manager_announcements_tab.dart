@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class ManagerAnnouncementsTab extends StatefulWidget {
   final String siteId;
@@ -111,26 +112,22 @@ class _ManagerAnnouncementsTabState extends State<ManagerAnnouncementsTab> {
               const SizedBox(width: 10),
               _posting
                   ? const SizedBox(
-                      width: 40,
-                      height: 40,
+                      width: 44,
+                      height: 44,
                       child: Padding(
-                        padding: EdgeInsets.all(8),
+                        padding: EdgeInsets.all(12),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
                         ),
                       ),
                     )
-                  : IconButton(
+                  : PrimaryButton(
                       onPressed: _post,
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(Icons.send, color: Colors.white, size: 20),
-                      ),
+                      icon: Icons.send,
+                      label: '',
+                      isFullWidth: false,
+                      height: 44,
                     ),
             ],
           ),

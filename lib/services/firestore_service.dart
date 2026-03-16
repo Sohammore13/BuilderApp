@@ -159,6 +159,10 @@ class FirestoreService {
     });
   }
 
+  Future<void> deleteSite(String siteId) async {
+    await _db.collection('sites').doc(siteId).delete();
+  }
+
   // ===========================================================================
   // ATTENDANCE — attendance/{siteId}/records/{date}/{engineerUID}
   // ===========================================================================
@@ -473,34 +477,27 @@ class FirestoreService {
   // MATERIAL REQUESTS
   // ===========================================================================
 
-  // Stream material requests for a site
   Stream<QuerySnapshot> streamMaterialRequests(String siteId) {
     return _db
       .collection('materialRequests')
       .doc(siteId)
       .collection('requests')
-      .orderBy('createdAt', descending: true)
       .snapshots();
   }
 
-  // Stream ALL material requests across all sites
   Stream<QuerySnapshot> streamAllMaterialRequests() {
     return _db
       .collectionGroup('requests')
-      .orderBy('createdAt', descending: true)
       .snapshots();
   }
 
-  // Stream ALL material requests across all sites with a specific status
   Stream<QuerySnapshot> streamAllMaterialRequestsByStatus(String status) {
     return _db
       .collectionGroup('requests')
       .where('status', isEqualTo: status)
-      .orderBy('createdAt', descending: true)
       .snapshots();
   }
 
-  // Stream material requests submitted by a specific engineer for a site
   Stream<QuerySnapshot> streamMyMaterialRequests({
     required String siteId,
     required String uid,
@@ -510,7 +507,6 @@ class FirestoreService {
       .doc(siteId)
       .collection('requests')
       .where('uploadedBy', isEqualTo: uid)
-      .orderBy('createdAt', descending: true)
       .snapshots();
   }
 
@@ -542,6 +538,7 @@ class FirestoreService {
     required String requestId,
     required String pdfUrl,
     required String uploadedBy,
+    String? quotationNote,
   }) async {
     await _db
       .collection('materialRequests')
@@ -552,6 +549,7 @@ class FirestoreService {
         'purchaseOrderPdfURL': pdfUrl,
         'pdfUploadedBy': uploadedBy,
         'pdfUploadedAt': FieldValue.serverTimestamp(),
+        'quotationNote': quotationNote ?? '',
         'status': 'pending_approval',
       });
   }
