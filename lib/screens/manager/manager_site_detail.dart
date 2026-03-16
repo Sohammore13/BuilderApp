@@ -82,7 +82,7 @@ class ManagerSiteDetailScreen extends StatelessWidget {
             tabs: const [
               Tab(icon: Icon(Icons.how_to_reg_outlined, size: 20), text: 'Attendance'),
               Tab(icon: Icon(Icons.campaign_outlined, size: 20), text: 'Announcements'),
-              Tab(icon: Icon(Icons.receipt_long_outlined, size: 20), text: 'Orders'),
+              Tab(icon: Icon(Icons.image_outlined, size: 20), text: 'Material Requests'),
             ],
           ),
         ),

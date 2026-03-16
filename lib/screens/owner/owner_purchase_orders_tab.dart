@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
 
@@ -18,7 +19,7 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
   Future<String> _getUserName(String uid) async {
     if (_userNameCache.containsKey(uid)) return _userNameCache[uid]!;
     final user = await _firestoreService.getUser(uid);
-    final name = user?.name ?? uid;
+    final name = user?.name ?? 'Unknown';
     _userNameCache[uid] = name;
     return name;
   }
@@ -31,17 +32,19 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
     return name;
   }
 
-  Future<void> _updateStatus(String siteId, String orderId, String status) async {
+  Future<void> _updateStatus(String siteId, String requestId, String status, {String? reason}) async {
     try {
-      await _firestoreService.updateOrderStatus(
+      await _firestoreService.updateMaterialRequestStatus(
         siteId: siteId,
-        orderId: orderId,
+        requestId: requestId,
         status: status,
+        reviewedBy: kOwnerUID,
+        rejectionReason: reason,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Order ${status == 'approved' ? 'approved' : 'rejected'}'),
+            content: Text('Request ${status == 'approved' ? 'approved' : 'rejected'}'),
             backgroundColor: status == 'approved' ? AppColors.success : AppColors.error,
           ),
         );
@@ -55,231 +58,239 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
     }
   }
 
-  void _showActionDialog(String siteId, String orderId, Map<String, dynamic> data) {
+  void _showRejectionDialog(String siteId, String requestId) {
+    final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.card,
-        title: Text(data['itemName'] ?? 'Purchase Order',
-            style: const TextStyle(color: AppColors.onSurface)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _detailRow('Quantity', '${data['quantity']}'),
-            _detailRow('Est. Cost', '₹${data['estimatedCost']}'),
-            if ((data['notes'] as String?)?.isNotEmpty == true)
-              _detailRow('Notes', data['notes']),
-          ],
+        title: const Text('Reject Request'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter rejection reason...',
+            border: OutlineInputBorder(),
+          ),
+          maxLines: 3,
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              _updateStatus(siteId, orderId, 'rejected');
-            },
-            child: const Text('Reject', style: TextStyle(color: AppColors.error)),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(ctx).pop();
-              _updateStatus(siteId, orderId, 'approved');
+              if (controller.text.trim().isEmpty) return;
+              Navigator.pop(ctx);
+              _updateStatus(siteId, requestId, 'rejected', reason: controller.text.trim());
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.success,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            child: const Text('Approve'),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            child: const Text('Reject', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
   }
 
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(label, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+  void _viewImage(String url) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          iconTheme: const IconThemeData(color: Colors.white),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-          Expanded(child: Text(value, style: AppTextStyles.body)),
-        ],
+        ),
+        body: Center(child: InteractiveViewer(child: Image.network(url))),
       ),
-    );
+    ));
+  }
+
+  Future<void> _viewPdf(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open PDF'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestoreService.streamAllPendingPurchaseOrders(),
+      stream: _firestoreService.streamAllMaterialRequests(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            ),
-          );
+          return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
         }
 
-        final docs = snapshot.data?.docs ?? [];
+        final allDocs = snapshot.data?.docs ?? [];
+        final pendingDocs = allDocs.where((d) => (d.data() as Map<String, dynamic>)['status'] == 'pending_approval').toList();
+        final historyDocs = allDocs.where((d) => ['approved', 'rejected'].contains((d.data() as Map<String, dynamic>)['status'])).toList();
 
-        if (docs.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.fact_check_outlined, size: 48, color: AppColors.onSurfaceMuted),
-                const SizedBox(height: 12),
-                Text('No pending approvals across any sites',
-                    style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
+        return ListView(
           padding: const EdgeInsets.all(16),
-          itemCount: docs.length,
-          itemBuilder: (context, index) {
-            final doc = docs[index];
-            final data = doc.data() as Map<String, dynamic>;
-            final siteId = doc.reference.parent.parent!.id;
-            
-            final status = data['status'] as String? ?? 'pending';
-            final itemName = data['itemName'] as String? ?? '';
-            final quantity = data['quantity'] ?? 0;
-            final cost = data['estimatedCost'] ?? 0;
-            final submittedBy = data['submittedBy'] as String? ?? '';
-            final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: status == 'pending'
-                    ? () => _showActionDialog(siteId, doc.id, data)
-                    : null,
-                child: Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.divider),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: FutureBuilder<String>(
-                              future: _getSiteName(siteId),
-                              builder: (ctx, siteSnap) {
-                                final sName = siteSnap.data ?? 'Loading...';
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      itemName,
-                                      style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
-                                    ),
-                                    Text(
-                                      sName,
-                                      style: AppTextStyles.caption.copyWith(color: AppColors.primary),
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.warning.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              'PENDING APPROVAL',
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.warning,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          _infoChip(Icons.inventory_2_outlined, 'Qty: $quantity'),
-                          const SizedBox(width: 10),
-                          _infoChip(Icons.currency_rupee, '₹$cost'),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      FutureBuilder<String>(
-                        future: _getUserName(submittedBy),
-                        builder: (ctx, nameSnap) {
-                          final name = nameSnap.data ?? '...';
-                          return Row(
-                            children: [
-                              const Icon(Icons.person_outline, size: 14, color: AppColors.onSurfaceMuted),
-                              const SizedBox(width: 4),
-                              Text('By: $name', style: AppTextStyles.caption),
-                              const Spacer(),
-                              if (createdAt != null)
-                                Text(
-                                  '${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                                  style: AppTextStyles.caption,
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                      if (status == 'pending')
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'Tap to approve or reject',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.primary,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+          children: [
+            if (pendingDocs.isNotEmpty) ...[
+              Text('PENDING APPROVAL', style: AppTextStyles.label.copyWith(color: AppColors.primary)),
+              const SizedBox(height: 12),
+              ...pendingDocs.map((doc) => _buildRequestCard(doc, isPending: true)),
+              const SizedBox(height: 24),
+            ],
+            if (historyDocs.isNotEmpty) ...[
+              Text('HISTORY', style: AppTextStyles.label),
+              const SizedBox(height: 12),
+              ...historyDocs.map((doc) => _buildRequestCard(doc, isPending: false)),
+            ],
+            if (allDocs.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 100),
+                child: Center(child: Text('No material requests found.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted))),
               ),
-            );
-          },
+          ],
         );
       },
     );
   }
 
-  Widget _infoChip(IconData icon, String text) {
+  Widget _buildRequestCard(DocumentSnapshot doc, {required bool isPending}) {
+    final data = doc.data() as Map<String, dynamic>;
+    final siteId = data['siteId'] ?? '';
+    final imageUrl = data['requestImageURL'] as String?;
+    final pdfUrl = data['purchaseOrderPdfURL'] as String?;
+    final engineerName = data['uploadedByName'] ?? 'Unknown Engineer';
+    final purchaseUid = data['pdfUploadedBy'] as String?;
+    final status = data['status'] as String? ?? 'pending';
+    final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+    final rejectionReason = data['rejectionReason'] as String?;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      color: AppColors.card,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: AppColors.divider),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (imageUrl != null)
+                  GestureDetector(
+                    onTap: () => _viewImage(imageUrl),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(imageUrl, width: 70, height: 70, fit: BoxFit.cover),
+                    ),
+                  ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FutureBuilder<String>(
+                        future: _getSiteName(siteId),
+                        builder: (context, snap) => Text(snap.data ?? 'Loading...', style: AppTextStyles.h4),
+                      ),
+                      const SizedBox(height: 4),
+                      Text('By Engineer: $engineerName', style: AppTextStyles.caption.copyWith(color: AppColors.primary)),
+                      if (purchaseUid != null)
+                        FutureBuilder<String>(
+                          future: _getUserName(purchaseUid),
+                          builder: (context, snap) => Text('Purchase: ${snap.data ?? '...'}', style: AppTextStyles.caption),
+                        ),
+                    ],
+                  ),
+                ),
+                _statusBadge(status),
+              ],
+            ),
+            if (status == 'rejected' && rejectionReason != null) ...[
+              const SizedBox(height: 10),
+              Text('Rejection Reason: $rejectionReason', style: AppTextStyles.caption.copyWith(color: AppColors.error)),
+            ],
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                if (imageUrl != null)
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _viewImage(imageUrl),
+                      icon: const Icon(Icons.image, size: 16),
+                      label: const Text('View Image'),
+                      style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                    ),
+                  ),
+                if (pdfUrl != null) ...[
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => _viewPdf(pdfUrl),
+                      icon: const Icon(Icons.picture_as_pdf, size: 16),
+                      label: const Text('View PDF'),
+                      style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            if (isPending) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _updateStatus(siteId, doc.id, 'approved'),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.success, foregroundColor: Colors.white),
+                      child: const Text('Approve'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => _showRejectionDialog(siteId, doc.id),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
+                      child: const Text('Reject'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (createdAt != null) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  'Submitted: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
+                  style: AppTextStyles.caption.copyWith(fontSize: 10),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _statusBadge(String status) {
+    Color color;
+    switch (status) {
+      case 'approved': color = AppColors.success; break;
+      case 'rejected': color = AppColors.error; break;
+      case 'pending_approval': color = Colors.orange; break;
+      default: color = Colors.blue;
+    }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: AppColors.onSurfaceMuted),
-          const SizedBox(width: 4),
-          Text(text, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w500)),
-        ],
-      ),
+      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+      child: Text(status.replaceAll('_', ' ').toUpperCase(), 
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
     );
   }
 }

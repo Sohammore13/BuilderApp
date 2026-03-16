@@ -24,6 +24,13 @@ class BuilderAppBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: AppColors.onSurface,
       elevation: 0,
       centerTitle: false,
+      leading: Navigator.of(context).canPop()
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back_ios, size: 20),
+              onPressed: () => Navigator.of(context).pop(),
+            )
+          : null,
+      titleSpacing: Navigator.of(context).canPop() ? 0 : null,
       title: Row(
         children: [
           Container(

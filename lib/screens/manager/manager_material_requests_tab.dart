@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
 
@@ -13,45 +15,52 @@ class ManagerMaterialRequestsTab extends StatefulWidget {
 
 class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab> {
   final _firestoreService = FirestoreService();
-  final Map<String, String> _userNameCache = {};
 
-  Future<String> _getUserName(String uid) async {
-    if (_userNameCache.containsKey(uid)) return _userNameCache[uid]!;
-    final user = await _firestoreService.getUser(uid);
-    final name = user?.name ?? uid;
-    _userNameCache[uid] = name;
-    return name;
+  void _viewImage(String url) {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          iconTheme: const IconThemeData(color: Colors.white),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
+        body: Center(child: InteractiveViewer(child: Image.network(url))),
+      ),
+    ));
   }
 
-  // Read-only view for Manager
+  Future<void> _viewPdf(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open PDF'), backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
 
-  Widget _detailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 80,
-            child: Text(label, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
-          ),
-          Expanded(child: Text(value, style: AppTextStyles.body)),
-        ],
-      ),
-    );
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'pending_quotation': return Colors.blue;
+      case 'pending_approval': return Colors.orange;
+      case 'approved': return AppColors.success;
+      case 'rejected': return AppColors.error;
+      default: return AppColors.onSurfaceMuted;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestoreService.streamPurchaseOrders(widget.siteId),
+      stream: _firestoreService.streamMaterialRequests(widget.siteId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-            ),
-          );
+          return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
         }
 
         final docs = snapshot.data?.docs ?? [];
@@ -61,10 +70,9 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.onSurfaceMuted),
+                const Icon(Icons.image_not_supported_outlined, size: 48, color: AppColors.onSurfaceMuted),
                 const SizedBox(height: 12),
-                Text('No purchase orders yet',
-                    style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)),
+                Text('No material requests for this site', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)),
               ],
             ),
           );
@@ -74,91 +82,72 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
           padding: const EdgeInsets.all(16),
           itemCount: docs.length,
           itemBuilder: (context, index) {
-            final doc = docs[index];
-            final data = doc.data() as Map<String, dynamic>;
-            final status = data['status'] as String? ?? 'pending';
-            final itemName = data['itemName'] as String? ?? '';
-            final quantity = data['quantity'] ?? 0;
-            final cost = data['estimatedCost'] ?? 0;
-            final submittedBy = data['submittedBy'] as String? ?? '';
+            final data = docs[index].data() as Map<String, dynamic>;
+            final imageUrl = data['requestImageURL'] as String?;
+            final pdfUrl = data['purchaseOrderPdfURL'] as String?;
+            final engineerName = data['uploadedByName'] ?? 'Unknown Engineer';
+            final status = data['status'] as String? ?? 'pending_quotation';
             final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+            final statusColor = _getStatusColor(status);
 
-            Color statusColor;
-            switch (status) {
-              case 'approved':
-                statusColor = AppColors.success;
-                break;
-              case 'rejected':
-                statusColor = AppColors.error;
-                break;
-              default:
-                statusColor = AppColors.warning;
-            }
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.divider),
-                ),
-                child: Column(
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              color: AppColors.card,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: AppColors.divider),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            itemName,
-                            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
-                          ),
+                    if (imageUrl != null)
+                      GestureDetector(
+                        onTap: () => _viewImage(imageUrl),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(imageUrl, width: 80, height: 80, fit: BoxFit.cover),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
+                      )
+                    else 
+                      Container(
+                        width: 80, height: 80, 
+                        decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.image_not_supported, color: AppColors.onSurfaceMuted),
+                      ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(engineerName, style: AppTextStyles.h4),
+                          if (createdAt != null)
+                            Text(DateFormat('MMM dd, yyyy').format(createdAt), style: AppTextStyles.caption),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
+                            child: Text(status.replaceAll('_', ' ').toUpperCase(), 
+                              style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
                           ),
-                          child: Text(
-                            status.toUpperCase(),
-                            style: AppTextStyles.caption.copyWith(
-                              color: statusColor,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        _infoChip(Icons.inventory_2_outlined, 'Qty: $quantity'),
-                        const SizedBox(width: 10),
-                        _infoChip(Icons.currency_rupee, '₹$cost'),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    FutureBuilder<String>(
-                      future: _getUserName(submittedBy),
-                      builder: (ctx, nameSnap) {
-                        final name = nameSnap.data ?? '...';
-                        return Row(
-                          children: [
-                            const Icon(Icons.person_outline, size: 14, color: AppColors.onSurfaceMuted),
-                            const SizedBox(width: 4),
-                            Text('By: $name', style: AppTextStyles.caption),
-                            const Spacer(),
-                            if (createdAt != null)
-                              Text(
-                                '${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                                style: AppTextStyles.caption,
+                          if (pdfUrl != null) ...[
+                            const SizedBox(height: 8),
+                            TextButton.icon(
+                              onPressed: () => _viewPdf(pdfUrl),
+                              icon: const Icon(Icons.picture_as_pdf, size: 18),
+                              label: const Text('View PDF'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 30),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
+                            ),
                           ],
-                        );
-                      },
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -167,24 +156,6 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
           },
         );
       },
-    );
-  }
-
-  Widget _infoChip(IconData icon, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: AppColors.onSurfaceMuted),
-          const SizedBox(width: 4),
-          Text(text, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w500)),
-        ],
-      ),
     );
   }
 }

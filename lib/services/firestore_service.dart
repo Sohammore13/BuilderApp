@@ -468,4 +468,91 @@ class FirestoreService {
       'reviewedAt': FieldValue.serverTimestamp(),
     });
   }
+
+  // ===========================================================================
+  // MATERIAL REQUESTS
+  // ===========================================================================
+
+  // Stream material requests for a site
+  Stream<QuerySnapshot> streamMaterialRequests(String siteId) {
+    return _db
+      .collection('materialRequests')
+      .doc(siteId)
+      .collection('requests')
+      .orderBy('createdAt', descending: true)
+      .snapshots();
+  }
+
+  // Stream ALL material requests across all sites
+  Stream<QuerySnapshot> streamAllMaterialRequests() {
+    return _db
+      .collectionGroup('requests')
+      .orderBy('createdAt', descending: true)
+      .snapshots();
+  }
+
+  // Stream ALL material requests across all sites with a specific status
+  Stream<QuerySnapshot> streamAllMaterialRequestsByStatus(String status) {
+    return _db
+      .collectionGroup('requests')
+      .where('status', isEqualTo: status)
+      .orderBy('createdAt', descending: true)
+      .snapshots();
+  }
+
+  // Stream material requests submitted by a specific engineer for a site
+  Stream<QuerySnapshot> streamMyMaterialRequests({
+    required String siteId,
+    required String uid,
+  }) {
+    return _db
+      .collection('materialRequests')
+      .doc(siteId)
+      .collection('requests')
+      .where('uploadedBy', isEqualTo: uid)
+      .orderBy('createdAt', descending: true)
+      .snapshots();
+  }
+
+  // Update material request status (owner approve/reject)
+  Future<void> updateMaterialRequestStatus({
+    required String siteId,
+    required String requestId,
+    required String status,
+    required String reviewedBy,
+    String? rejectionReason,
+  }) async {
+    final data = {
+      'status': status,
+      'reviewedBy': reviewedBy,
+      'reviewedAt': FieldValue.serverTimestamp(),
+    };
+    if (rejectionReason != null) data['rejectionReason'] = rejectionReason;
+    await _db
+      .collection('materialRequests')
+      .doc(siteId)
+      .collection('requests')
+      .doc(requestId)
+      .update(data);
+  }
+
+  // Add PDF to existing material request (purchase team)
+  Future<void> uploadPurchaseOrderPdf({
+    required String siteId,
+    required String requestId,
+    required String pdfUrl,
+    required String uploadedBy,
+  }) async {
+    await _db
+      .collection('materialRequests')
+      .doc(siteId)
+      .collection('requests')
+      .doc(requestId)
+      .update({
+        'purchaseOrderPdfURL': pdfUrl,
+        'pdfUploadedBy': uploadedBy,
+        'pdfUploadedAt': FieldValue.serverTimestamp(),
+        'status': 'pending_approval',
+      });
+  }
 }

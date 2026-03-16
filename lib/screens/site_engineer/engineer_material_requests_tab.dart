@@ -7,17 +7,16 @@ import '../../constants.dart';
 import '../../services/firestore_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/cloudinary_service.dart';
-import 'purchase_request_detail_screen.dart';
 
-class PurchaseOrdersTab extends StatefulWidget {
+class EngineerMaterialRequestsTab extends StatefulWidget {
   final String siteId;
-  const PurchaseOrdersTab({super.key, required this.siteId});
+  const EngineerMaterialRequestsTab({super.key, required this.siteId});
 
   @override
-  State<PurchaseOrdersTab> createState() => _PurchaseOrdersTabState();
+  State<EngineerMaterialRequestsTab> createState() => _EngineerMaterialRequestsTabState();
 }
 
-class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
+class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTab> {
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
   final CloudinaryService _cloudinaryService = CloudinaryService();
@@ -42,7 +41,7 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
       final userModel = await _authService.getUserModel(user.uid);
       if (mounted) {
         setState(() {
-          _currentUserName = userModel?.name ?? 'Unknown Purchase Member';
+          _currentUserName = userModel?.name ?? 'Unknown Engineer';
         });
       }
     }
@@ -242,7 +241,10 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
             // List
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: _firestoreService.streamMaterialRequests(widget.siteId),
+                stream: _firestoreService.streamMyMaterialRequests(
+                  siteId: widget.siteId,
+                  uid: _currentUid ?? '',
+                ),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
@@ -250,7 +252,7 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
 
                   final docs = snapshot.data?.docs ?? [];
                   if (docs.isEmpty) {
-                    return Center(child: Text('No material requests yet.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)));
+                    return Center(child: Text('No material requests submitted yet.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)));
                   }
 
                   return ListView.builder(
@@ -273,30 +275,18 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
                         ),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () {
-                             Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PurchaseRequestDetailScreen(
-                                  siteId: widget.siteId,
-                                  requestId: doc.id,
-                                  requestData: data,
-                                ),
-                              ),
-                            );
-                          },
+                          onTap: imageUrl != null ? () => _viewFullScreenImage(imageUrl) : null,
                           child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Row(
                               children: [
                                 if (imageUrl != null)
-                                  GestureDetector(
-                                    onTap: () => _viewFullScreenImage(imageUrl),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
-                                    ),
-                                  ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
+                                  )
+                                else 
+                                  const Icon(Icons.image_not_supported),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
