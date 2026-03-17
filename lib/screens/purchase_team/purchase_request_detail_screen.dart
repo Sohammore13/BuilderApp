@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
@@ -38,6 +39,62 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
   String get _imageUrl => widget.requestData['requestImageURL'] as String? ?? '';
   String? get _quotationUrl => widget.requestData['purchaseOrderPdfURL'] as String?;
   String? get _existingNote => widget.requestData['quotationNote'] as String?;
+
+  void _clearSelectedAttachment() {
+    setState(() {
+      _selectedImageBytes = null;
+      _selectedFilename = null;
+    });
+  }
+
+  bool get _canDeleteRequest =>
+      _status == 'pending_quotation' || _status == 'pending_approval' || _status == 'rejected';
+
+  Future<void> _deleteRequest() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        title: const Text('Delete Request', style: TextStyle(color: AppColors.onSurface)),
+        content: const Text(
+          'Are you sure you want to delete this request? This cannot be undone.',
+          style: TextStyle(color: AppColors.onSurfaceMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.onSurfaceMuted)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('materialRequests')
+          .doc(widget.siteId)
+          .collection('requests')
+          .doc(widget.requestId)
+          .delete();
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Request deleted'), backgroundColor: AppColors.success),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete: $e'), backgroundColor: AppColors.error),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -197,6 +254,14 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text('Requirement Details', style: TextStyle(fontSize: 18)),
+        actions: [
+          if (_canDeleteRequest)
+            IconButton(
+              tooltip: 'Delete',
+              onPressed: _deleteRequest,
+              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+            ),
+        ],
       ),
       body: Stack(
         children: [
@@ -268,11 +333,43 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                         ),
                         if (_selectedFilename != null) ...[
                           const SizedBox(height: 10),
-                          Text('Selected: $_selectedFilename', 
-                            style: AppTextStyles.body.copyWith(color: AppColors.success, fontWeight: FontWeight.bold),
-                            textAlign: TextAlign.center,
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.background,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: AppColors.divider),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  (_selectedFilename?.toLowerCase().endsWith('.pdf') ?? false)
+                                      ? Icons.picture_as_pdf_outlined
+                                      : Icons.image_outlined,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    _selectedFilename!,
+                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: _pickFile,
+                                  style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+                                  child: const Text('Change'),
+                                ),
+                                IconButton(
+                                  tooltip: 'Remove',
+                                  onPressed: _clearSelectedAttachment,
+                                  icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
                           PrimaryButton(
                             onPressed: _uploadQuotation,
                             icon: Icons.send,

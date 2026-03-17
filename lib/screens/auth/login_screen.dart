@@ -3,9 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../constants.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/common_widgets.dart';
+import 'register_screen.dart';
+import '../../main.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final String role;
+  const LoginScreen({super.key, this.role = kRoleSiteEngineer});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -20,6 +23,34 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+
+  String get _roleLabel {
+    switch (widget.role) {
+      case kRoleOwner:
+        return 'Owner';
+      case kRoleManager:
+        return 'Manager';
+      case kRoleSiteEngineer:
+        return 'Site Engineer';
+      case kRolePurchaseTeam:
+        return 'Purchase Team';
+      default:
+        return widget.role;
+    }
+  }
+
+  bool get _canRegister =>
+      widget.role == kRoleSiteEngineer || widget.role == kRolePurchaseTeam;
+
+  Future<bool> _matchesSelectedRole(String uid) async {
+    // Owner & Manager are enforced by UID shortcut (same logic as AuthWrapper).
+    if (widget.role == kRoleOwner) return uid == kOwnerUID;
+    if (widget.role == kRoleManager) return uid == kManagerUID;
+
+    // Other roles are stored in Firestore user document.
+    final role = await _authService.getUserRole(uid);
+    return role == widget.role;
+  }
 
   @override
   void dispose() {
@@ -41,7 +72,29 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-      // Navigation is handled by AuthWrapper in main.dart via StreamBuilder
+
+      final user = _authService.currentUser;
+      if (user == null) {
+        throw Exception('Sign in failed. Please try again.');
+      }
+
+      final ok = await _matchesSelectedRole(user.uid);
+      if (!ok) {
+        await _authService.signOut();
+        if (!mounted) return;
+        setState(() {
+          _errorMessage =
+              'This account is not an ${_roleLabel.toLowerCase()} account. Please select the correct role.';
+        });
+        return;
+      }
+
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
+        (route) => false,
+      );
     } on FirebaseAuthException catch (e) {
       setState(() {
         switch (e.code) {
@@ -90,6 +143,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryTint,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+                          ),
+                          child: Text(
+                            _roleLabel,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 40),
 
                     // ----------------------------------------------------------
@@ -101,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Image.asset(
                             'assets/images/logo.jpg',
                             width: 220,
-                            fit: BoxFit.contain,
+                            fit: BoxFit.contain,  
                           ),
                           const SizedBox(height: 6),
                           Text(
@@ -211,39 +287,40 @@ class _LoginScreenState extends State<LoginScreen> {
                     // ----------------------------------------------------------
                     // Register link
                     // ----------------------------------------------------------
-                    Center(
-                      child: Column(
-                        children: [
-                          const Divider(color: AppColors.divider),
-                          const SizedBox(height: 16),
-                          Text(
-                            "New to BuilderPro?",
-                            style: AppTextStyles.caption,
-                          ),
-                          const SizedBox(height: 8),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushNamed('/register');
-                            },
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.primary,
+                    if (_canRegister)
+                      Center(
+                        child: Column(
+                          children: [
+                            const Divider(color: AppColors.divider),
+                            const SizedBox(height: 16),
+                            Text(
+                              "New to BuilderPro?",
+                              style: AppTextStyles.caption,
                             ),
-                            child: const Text(
-                              'Create an Account',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 15,
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => RegisterScreen(role: widget.role),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.primary,
+                              ),
+                              child: const Text(
+                                'Create an Account',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '(For Site Engineers & Purchase Team only)',
-                            style: AppTextStyles.caption.copyWith(fontSize: 11),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

@@ -6,8 +6,19 @@ import '../../services/firestore_service.dart';
 import '../../models/site_model.dart';
 import 'engineer_site_detail.dart';
 
-class EngineerDashboard extends StatelessWidget {
+class EngineerDashboard extends StatefulWidget {
   const EngineerDashboard({super.key});
+
+  @override
+  State<EngineerDashboard> createState() => _EngineerDashboardState();
+}
+
+class _EngineerDashboardState extends State<EngineerDashboard> {
+  int _refreshTick = 0;
+
+  Future<void> _onRefresh() async {
+    setState(() => _refreshTick++);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,56 +28,62 @@ class EngineerDashboard extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const BuilderAppBar(title: 'Site Engineer'),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome banner
-            _EngineerBanner(),
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        color: AppColors.primary,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Welcome banner
+              _EngineerBanner(),
 
-            const SizedBox(height: 28),
+              const SizedBox(height: 28),
 
-            // My Sites (real-time)
-            const SectionHeader(title: 'My Sites'),
-            StreamBuilder<List<SiteModel>>(
-              stream: firestoreService.streamSitesForEngineer(uid),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+              // My Sites (real-time)
+              const SectionHeader(title: 'My Sites'),
+              StreamBuilder<List<SiteModel>>(
+                key: ValueKey(_refreshTick),
+                stream: firestoreService.streamSitesForEngineer(uid),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32),
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                        ),
                       ),
-                    ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return _EmptyState(
+                      icon: Icons.error_outline,
+                      message: 'Error loading sites',
+                      color: AppColors.error,
+                    );
+                  }
+
+                  final sites = snapshot.data ?? [];
+
+                  if (sites.isEmpty) {
+                    return _EmptyState(
+                      icon: Icons.location_off_outlined,
+                      message: 'No sites assigned yet.\nThe owner will assign you to a site.',
+                      color: AppColors.onSurfaceMuted,
+                    );
+                  }
+
+                  return Column(
+                    children: sites.map((site) => _SiteCard(site: site)).toList(),
                   );
-                }
-
-                if (snapshot.hasError) {
-                  return _EmptyState(
-                    icon: Icons.error_outline,
-                    message: 'Error loading sites',
-                    color: AppColors.error,
-                  );
-                }
-
-                final sites = snapshot.data ?? [];
-
-                if (sites.isEmpty) {
-                  return _EmptyState(
-                    icon: Icons.location_off_outlined,
-                    message: 'No sites assigned yet.\nThe owner will assign you to a site.',
-                    color: AppColors.onSurfaceMuted,
-                  );
-                }
-
-                return Column(
-                  children: sites.map((site) => _SiteCard(site: site)).toList(),
-                );
-              },
-            ),
-          ],
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

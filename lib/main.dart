@@ -6,6 +6,7 @@ import 'constants.dart';
 import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
+import 'screens/auth/role_selection_screen.dart';
 import 'screens/owner/owner_dashboard.dart';
 import 'screens/manager/manager_dashboard.dart';
 import 'screens/site_engineer/engineer_dashboard.dart';
@@ -53,27 +54,54 @@ class BuilderApp extends StatelessWidget {
           labelSmall: AppTextStyles.caption,
         ),
         appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.onPrimary,
+          backgroundColor: AppColors.surface,
+          foregroundColor: AppColors.onSurface,
           elevation: 0,
+          surfaceTintColor: Colors.transparent,
           centerTitle: true,
-          titleTextStyle: AppTextStyles.h3.copyWith(color: AppColors.onPrimary),
+          titleTextStyle: AppTextStyles.h3.copyWith(color: AppColors.onSurface),
+        ),
+        tabBarTheme: const TabBarThemeData(
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.onSurfaceMuted,
+          indicatorColor: AppColors.primary,
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: AppColors.surface,
+          indicatorColor: AppColors.primaryTint,
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: AppColors.primary);
+            }
+            return const IconThemeData(color: AppColors.onSurfaceMuted);
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return AppTextStyles.label.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              );
+            }
+            return AppTextStyles.label.copyWith(color: AppColors.onSurfaceMuted);
+          }),
+        ),
+        cardTheme: CardThemeData(
+          color: AppColors.card,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: const BorderSide(color: AppColors.divider),
+          ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.onPrimary,
-            textStyle: AppTextStyles.button,
-            elevation: 2,
+            foregroundColor: Colors.white,
+            elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle: AppTextStyles.button,
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           ),
-        ),
-        cardTheme: CardThemeData(
-          color: AppColors.card,
-          elevation: 2,
-          shadowColor: AppColors.onSurface.withValues(alpha: 0.1),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
       ),
       routes: {
@@ -114,10 +142,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     final nav = _navigatorKey.currentState;
     if (nav == null) return;
 
-    // ── Signed out → Login (clear entire back stack) ────────────────────────
+    // ── Signed out → Role selection (clear entire back stack) ──────────────
     if (user == null) {
       nav.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+        MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
         (route) => false,
       );
       return;

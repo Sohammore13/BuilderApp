@@ -15,62 +15,80 @@ class PurchaseOrdersTab extends StatefulWidget {
 
 class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
   final FirestoreService _firestoreService = FirestoreService();
+  int _refreshTick = 0;
+
+  Future<void> _onRefresh() async {
+    setState(() => _refreshTick++);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestoreService.streamMaterialRequests(widget.siteId),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
-        }
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: AppColors.primary,
+      child: StreamBuilder<QuerySnapshot>(
+        key: ValueKey(_refreshTick),
+        stream: _firestoreService.streamMaterialRequests(widget.siteId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)));
+          }
 
-        final allDocs = (snapshot.data?.docs ?? []).toList();
-        allDocs.sort((a, b) {
-          final aTime = (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
-          final bTime = (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
-          if (aTime == null || bTime == null) return 0;
-          return bTime.compareTo(aTime);
-        });
-        
-        // Split into pending actions and history
-        final pendingAction = allDocs.where((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          return data['status'] == 'pending_quotation';
-        }).toList();
+          final allDocs = (snapshot.data?.docs ?? []).toList();
+          allDocs.sort((a, b) {
+            final aTime = (a.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+            final bTime = (b.data() as Map<String, dynamic>)['createdAt'] as Timestamp?;
+            if (aTime == null || bTime == null) return 0;
+            return bTime.compareTo(aTime);
+          });
 
-        final history = allDocs.where((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          return data['status'] != 'pending_quotation';
-        }).toList();
+          // Split into pending actions and history
+          final pendingAction = allDocs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return data['status'] == 'pending_quotation';
+          }).toList();
 
-        if (allDocs.isEmpty) {
-          return Center(
-            child: Text('No material requirements submitted by engineers yet.', 
-              style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted),
-              textAlign: TextAlign.center,
-            ),
+          final history = allDocs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return data['status'] != 'pending_quotation';
+          }).toList();
+
+          if (allDocs.isEmpty) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const SizedBox(height: 120),
+                Center(
+                  child: Text(
+                    'No material requirements submitted by engineers yet.',
+                    style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: [
+              if (pendingAction.isNotEmpty) ...[
+                Text('PENDING YOUR ACTION', style: AppTextStyles.label.copyWith(color: AppColors.primary)),
+                const SizedBox(height: 12),
+                ...pendingAction.map((doc) => _buildRequestCard(doc)),
+                const SizedBox(height: 24),
+              ],
+
+              if (history.isNotEmpty) ...[
+                Text('HISTORY', style: AppTextStyles.label),
+                const SizedBox(height: 12),
+                ...history.map((doc) => _buildRequestCard(doc, isHistory: true)),
+              ],
+            ],
           );
-        }
-
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            if (pendingAction.isNotEmpty) ...[
-              Text('PENDING YOUR ACTION', style: AppTextStyles.label.copyWith(color: AppColors.primary)),
-              const SizedBox(height: 12),
-              ...pendingAction.map((doc) => _buildRequestCard(doc)),
-              const SizedBox(height: 24),
-            ],
-            
-            if (history.isNotEmpty) ...[
-              Text('HISTORY', style: AppTextStyles.label),
-              const SizedBox(height: 12),
-              ...history.map((doc) => _buildRequestCard(doc, isHistory: true)),
-            ],
-          ],
-        );
-      },
+        },
+      ),
     );
   }
 

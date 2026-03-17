@@ -29,6 +29,13 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
   String? _currentUid;
   String? _currentUserName;
 
+  void _clearSelectedImage() {
+    setState(() {
+      _selectedImageBytes = null;
+      _selectedImageName = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -123,6 +130,15 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
       builder: (ctx) => SafeArea(
         child: Wrap(
           children: [
+            if (_selectedImageBytes != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                title: Text('Remove selected image', style: AppTextStyles.bodyLg),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _clearSelectedImage();
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.camera_alt, color: AppColors.primary),
               title: Text('Take Photo', style: AppTextStyles.bodyLg),
@@ -194,17 +210,33 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                           borderRadius: BorderRadius.circular(12),
                           child: Image.memory(_selectedImageBytes!, height: 200, width: double.infinity, fit: BoxFit.cover),
                         ),
-                        Positioned(
-                          top: 8, right: 8,
-                          child: CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            child: IconButton(
-                              icon: const Icon(Icons.close, color: Colors.white),
-                              onPressed: () => setState(() {
-                                _selectedImageBytes = null;
-                                _selectedImageName = null;
-                              }),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SecondaryButton(
+                            onPressed: _showImagePickerOptions,
+                            icon: Icons.edit_outlined,
+                            label: 'Change',
+                            color: AppColors.primary,
+                            height: 48,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        SizedBox(
+                          width: 52,
+                          height: 48,
+                          child: OutlinedButton(
+                            onPressed: _clearSelectedImage,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.error,
+                              side: BorderSide(color: AppColors.error.withValues(alpha: 0.6)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: EdgeInsets.zero,
                             ),
+                            child: const Icon(Icons.delete_outline, size: 20),
                           ),
                         ),
                       ],
@@ -258,6 +290,7 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                       final status = data['status'] as String? ?? 'pending';
                       final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
                       final rejectionReason = data['rejectionReason'] as String?;
+                      final canDelete = status == 'pending_quotation' || status == 'rejected';
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
@@ -293,6 +326,12 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                                     ],
                                   ),
                                 ),
+                                if (canDelete)
+                                  IconButton(
+                                    tooltip: 'Delete',
+                                    icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                                    onPressed: () => _deleteRequest(doc.id),
+                                  ),
                                 _statusBadge(status),
                               ],
                             ),
@@ -324,5 +363,56 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
       decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
       child: Text(status.replaceAll('_', ' ').toUpperCase(), style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
     );
+  }
+
+  Future<void> _deleteRequest(String requestId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.card,
+        title: const Text('Delete Request', style: TextStyle(color: AppColors.onSurface)),
+        content: const Text(
+          'Are you sure you want to delete this request? This cannot be undone.',
+          style: TextStyle(color: AppColors.onSurfaceMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.onSurfaceMuted)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('materialRequests')
+          .doc(widget.siteId)
+          .collection('requests')
+          .doc(requestId)
+          .delete();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Request deleted'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete: $e'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 }

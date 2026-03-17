@@ -26,21 +26,22 @@ const String kRoleManager = 'manager';
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFF0F2027);       // Deep Navy Blue
-  static const Color primaryLight = Color(0xFF203A43);  // Lighter Navy
-  static const Color primaryDark = Color(0xFF070F13);   // Darker Navy
-  static const Color accent = Color(0xFFFF9800);        // Safety Orange / Gold
-  static const Color accentLight = Color(0xFFFFB74D);
-  static const Color surface = Color(0xFFFFFFFF);       // White surface
-  static const Color background = Color(0xFFF8FAFC);    // Off-white / cool grey background
-  static const Color card = Color(0xFFFFFFFF);          // White card surface
-  static const Color onPrimary = Colors.white;
-  static const Color onSurface = Color(0xFF1E293B);     // Dark Slate for high readability
-  static const Color onSurfaceMuted = Color(0xFF64748B); // Muted slate text
-  static const Color success = Color(0xFF10B981);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color error = Color(0xFFEF4444);
-  static const Color divider = Color(0xFFE2E8F0);
+  static const Color primary = Color(0xFFE53935);
+  static const Color primaryLight = Color(0xFFEF5350);
+  static const Color primaryDark = Color(0xFFC62828);
+  static const Color primaryTint = Color(0xFFFFEBEE);
+  static const Color accent = Color(0xFF1A1A1A);
+  static const Color accentLight = Color(0xFF37474F);
+  static const Color surface = Color(0xFFFFFFFF);
+  static const Color background = Color(0xFFF5F5F5);
+  static const Color card = Color(0xFFFFFFFF);
+  static const Color onPrimary = Color(0xFFFFFFFF);
+  static const Color onSurface = Color(0xFF1A1A1A);
+  static const Color onSurfaceMuted = Color(0xFF78909C);
+  static const Color success = Color(0xFF388E3C);
+  static const Color warning = Color(0xFFF57C00);
+  static const Color error = Color(0xFFD32F2F);
+  static const Color divider = Color(0xFFEEEEEE);
 }
 
 // ---------------------------------------------------------------------------
@@ -49,61 +50,61 @@ class AppColors {
 class AppTextStyles {
   AppTextStyles._();
 
-  static TextStyle h1 = GoogleFonts.montserrat(
+  static TextStyle h1 = GoogleFonts.raleway(
     fontSize: 32,
     fontWeight: FontWeight.w700,
     color: AppColors.onSurface,
     letterSpacing: -1.0,
   );
 
-  static TextStyle h2 = GoogleFonts.montserrat(
+  static TextStyle h2 = GoogleFonts.raleway(
     fontSize: 24,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurface,
     letterSpacing: -0.5,
   );
 
-  static TextStyle h3 = GoogleFonts.montserrat(
+  static TextStyle h3 = GoogleFonts.raleway(
     fontSize: 20,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurface,
   );
 
-  static TextStyle h4 = GoogleFonts.montserrat(
+  static TextStyle h4 = GoogleFonts.raleway(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurface,
   );
 
-  static TextStyle bodyLg = GoogleFonts.inter(
+  static TextStyle bodyLg = GoogleFonts.nunito(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.onSurface,
   );
 
-  static TextStyle body = GoogleFonts.inter(
+  static TextStyle body = GoogleFonts.nunito(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.onSurface,
     height: 1.5,
   );
 
-  static TextStyle caption = GoogleFonts.inter(
+  static TextStyle caption = GoogleFonts.nunito(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.onSurfaceMuted,
   );
 
-  static TextStyle label = GoogleFonts.inter(
+  static TextStyle label = GoogleFonts.nunito(
     fontSize: 13,
     fontWeight: FontWeight.w500,
     color: AppColors.onSurfaceMuted,
     letterSpacing: 0.5,
   );
   
-  static TextStyle button = GoogleFonts.inter(
+  static TextStyle button = GoogleFonts.raleway(
     fontSize: 15,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w700,
     color: Colors.white,
     letterSpacing: 0.5,
   );

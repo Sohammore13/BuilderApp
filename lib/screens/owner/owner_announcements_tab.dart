@@ -27,6 +27,35 @@ class _OwnerAnnouncementsTabState extends State<OwnerAnnouncementsTab> {
           );
         }
 
+        if (snapshot.hasError) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.lock_outline, size: 48, color: AppColors.error),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Unable to load announcements',
+                    style: AppTextStyles.body.copyWith(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    '${snapshot.error}',
+                    style: AppTextStyles.caption,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         final docs = snapshot.data?.docs ?? [];
 
         if (docs.isEmpty) {

@@ -3,9 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../constants.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/common_widgets.dart';
+import '../../main.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  final String? role;
+  const RegisterScreen({super.key, this.role});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -23,11 +25,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _errorMessage;
 
   // Role options — owner and manager are intentionally excluded
-  String _selectedRole = kRoleSiteEngineer;
-  final List<Map<String, String>> _roles = [
-    {'value': kRoleSiteEngineer, 'label': 'Site Engineer'},
-    {'value': kRolePurchaseTeam, 'label': 'Purchase Team'},
-  ];
+  late String _selectedRole;
+  late bool _allowRoleChange;
+
+  String get _roleLabel {
+    switch (_selectedRole) {
+      case kRoleSiteEngineer:
+        return 'Site Engineer';
+      case kRolePurchaseTeam:
+        return 'Purchase Team';
+      case kRoleOwner:
+        return 'Owner';
+      case kRoleManager:
+        return 'Manager';
+      default:
+        return _selectedRole;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _allowRoleChange = widget.role == null;
+    _selectedRole = widget.role ?? kRoleSiteEngineer;
+  }
 
   @override
   void dispose() {
@@ -52,7 +73,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: _passwordController.text,
         role: _selectedRole,
       );
-      // AuthWrapper in main.dart will handle the redirect to role dashboard
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
+        (route) => false,
+      );
     } on FirebaseAuthException catch (e) {
       setState(() {
         switch (e.code) {
@@ -198,38 +224,72 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                           const SizedBox(height: 16),
 
-                          // Role dropdown
-                          DropdownButtonFormField<String>(
-                            initialValue: _selectedRole,
-                            decoration: InputDecoration(
-                              labelText: 'Role',
-                              labelStyle: const TextStyle(color: AppColors.onSurfaceMuted),
-                              prefixIcon: const Icon(Icons.work_outline, color: AppColors.onSurfaceMuted, size: 20),
-                              filled: true,
-                              fillColor: AppColors.card,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.divider),
+                          if (_allowRoleChange)
+                            DropdownButtonFormField<String>(
+                              initialValue: _selectedRole,
+                              decoration: InputDecoration(
+                                labelText: 'Role',
+                                labelStyle: const TextStyle(color: AppColors.onSurfaceMuted),
+                                prefixIcon: const Icon(Icons.work_outline, color: AppColors.onSurfaceMuted, size: 20),
+                                filled: true,
+                                fillColor: AppColors.card,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.divider),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.divider),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
+                                ),
                               ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.divider),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                              ),
+                              dropdownColor: AppColors.card,
+                              style: const TextStyle(color: AppColors.onSurface),
+                              items: const [
+                                DropdownMenuItem(
+                                  value: kRoleOwner,
+                                  enabled: false,
+                                  child: Text('Owner (admin only)'),
+                                ),
+                                DropdownMenuItem(
+                                  value: kRoleManager,
+                                  enabled: false,
+                                  child: Text('Manager (admin only)'),
+                                ),
+                                DropdownMenuItem(
+                                  value: kRoleSiteEngineer,
+                                  child: Text('Site Engineer'),
+                                ),
+                                DropdownMenuItem(
+                                  value: kRolePurchaseTeam,
+                                  child: Text('Purchase Team'),
+                                ),
+                              ],
+                              onChanged: (v) => setState(() => _selectedRole = v ?? _selectedRole),
+                            )
+                          else
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryTint,
+                                    borderRadius: BorderRadius.circular(18),
+                                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
+                                  ),
+                                  child: Text(
+                                    _roleLabel,
+                                    style: AppTextStyles.caption.copyWith(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            dropdownColor: AppColors.card,
-                            style: const TextStyle(color: AppColors.onSurface),
-                            items: _roles
-                                .map((r) => DropdownMenuItem(
-                                      value: r['value'],
-                                      child: Text(r['label']!),
-                                    ))
-                                .toList(),
-                            onChanged: (v) => setState(() => _selectedRole = v!),
-                          ),
 
                           const SizedBox(height: 12),
 
@@ -247,7 +307,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
-                                    'Owner accounts are created by the developer only.',
+                                    _allowRoleChange
+                                        ? 'Owner and Manager accounts are created by the developer only.'
+                                        : 'Owner accounts are created by the developer only.',
                                     style: AppTextStyles.caption.copyWith(color: AppColors.primary),
                                   ),
                                 ),
