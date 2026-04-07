@@ -6,7 +6,6 @@ import 'constants.dart';
 import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
-import 'screens/auth/role_selection_screen.dart';
 import 'screens/owner/owner_dashboard.dart';
 import 'screens/manager/manager_dashboard.dart';
 import 'screens/site_engineer/engineer_dashboard.dart';
@@ -142,10 +141,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
     final nav = _navigatorKey.currentState;
     if (nav == null) return;
 
-    // ── Signed out → Role selection (clear entire back stack) ──────────────
+    // ── Signed out → Login (clear entire back stack) ────────────────────────
     if (user == null) {
       nav.pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
         (route) => false,
       );
       return;
@@ -221,7 +220,7 @@ class _SplashScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/logo.jpg',
+              'assets/images/logo.png',
               width: 180,
               fit: BoxFit.contain,
             ),
