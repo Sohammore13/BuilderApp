@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 // ---------------------------------------------------------------------------
 // IMPORTANT: Replace the placeholder below with the actual Firebase UID of
 // the pre-created Owner account before releasing the app.
-const String kOwnerUID = 'X7UjcFVXxLdfakc467oMDIxKmvM2';
+const String kOwnerUID = 'BXn7yDKDixMiGrDhwXHjYDrcMcz2';
 const String kManagerUID = 'kMCReLyAE8fEqIrG1MUq3S6gnlu1';
 
 // ---------------------------------------------------------------------------
