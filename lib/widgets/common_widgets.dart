@@ -20,32 +20,46 @@ class BuilderAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+<<<<<<< Updated upstream
       backgroundColor: AppColors.surface,
       foregroundColor: AppColors.onSurface,
       elevation: 0,
       centerTitle: false,
+=======
+      centerTitle: true,
+>>>>>>> Stashed changes
       leading: Navigator.of(context).canPop()
           ? IconButton(
               icon: const Icon(Icons.arrow_back_ios, size: 20),
               onPressed: () => Navigator.of(context).pop(),
             )
           : null,
-      titleSpacing: Navigator.of(context).canPop() ? 0 : null,
       title: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Image.asset(
               'assets/images/logo.jpg',
-              width: 30,
-              height: 30,
+              width: 28,
+              height: 28,
               fit: BoxFit.cover,
             ),
           ),
+<<<<<<< Updated upstream
           const SizedBox(width: 10),
           Text(
             title,
             style: AppTextStyles.h3.copyWith(color: AppColors.onSurface),
+=======
+          const SizedBox(width: AppSpacing.s),
+          Flexible(
+            child: Text(
+              title,
+              style: AppTextStyles.appBarTitle,
+              overflow: TextOverflow.ellipsis,
+            ),
+>>>>>>> Stashed changes
           ),
         ],
       ),
@@ -118,7 +132,7 @@ class DashboardCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
           border: Border.all(color: AppColors.divider, width: 1),
           boxShadow: [
             BoxShadow(
@@ -129,7 +143,7 @@ class DashboardCard extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppSpacing.screenPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -169,7 +183,7 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.m),
       child: Text(
         title,
         style: AppTextStyles.h3.copyWith(color: AppColors.onSurface),
@@ -341,9 +355,9 @@ class PrimaryButton extends StatelessWidget {
           backgroundColor: color ?? AppColors.primary,
           foregroundColor: Colors.white,
           disabledBackgroundColor: (color ?? AppColors.primary).withValues(alpha: 0.5),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
         ),
         child: isLoading
             ? const SizedBox(

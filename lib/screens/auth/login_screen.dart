@@ -137,7 +137,10 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Stack(
           children: [
             SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: AppSpacing.xl,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -146,12 +149,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface),
+                          padding: EdgeInsets.zero,
+                          alignment: Alignment.centerLeft,
+                          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface, size: 20),
                           onPressed: () => Navigator.pop(context),
                         ),
+                        const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
+<<<<<<< Updated upstream
                             color: AppColors.primaryTint,
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
@@ -161,12 +168,24 @@ class _LoginScreenState extends State<LoginScreen> {
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.primary,
                               fontWeight: FontWeight.bold,
+=======
+                            color: roleChipTone.background,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: roleChipTone.border()),
+                          ),
+                          child: Text(
+                            _roleLabel.toUpperCase(),
+                            style: AppTextStyles.label.copyWith(
+                              color: roleChipTone.foreground,
+                              letterSpacing: 0.5,
+                              fontSize: 10,
+>>>>>>> Stashed changes
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: AppSpacing.xxl),
 
                     // ----------------------------------------------------------
                     // Logo + headline
@@ -176,30 +195,38 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Image.asset(
                             'assets/images/logo.jpg',
-                            width: 220,
+                            width: 180,
                             fit: BoxFit.contain,  
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: AppSpacing.s),
                           Text(
                             'Construction Management Platform',
+<<<<<<< Updated upstream
                             style: AppTextStyles.caption.copyWith(fontSize: 13),
+=======
+                            style: AppTextStyles.body.copyWith(
+                              fontSize: 13,
+                              color: AppColors.onSurfaceSecondary,
+                              letterSpacing: 0.2,
+                            ),
+>>>>>>> Stashed changes
                           ),
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 48),
+                    const SizedBox(height: AppSpacing.xxl * 1.5),
 
                     // ----------------------------------------------------------
                     // Sign in label
                     // ----------------------------------------------------------
                     Text('Sign In', style: AppTextStyles.h2),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Welcome back! Enter your credentials to continue.',
                       style: AppTextStyles.caption,
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ----------------------------------------------------------
                     // Email field
@@ -270,7 +297,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height: AppSpacing.xl),
 
                     // ----------------------------------------------------------
                     // Sign In button
@@ -282,7 +309,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: Icons.login,
                     ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xxl),
 
                     // ----------------------------------------------------------
                     // Register link

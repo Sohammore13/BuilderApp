@@ -65,6 +65,10 @@ class FirestoreService {
     required String createdBy,
     required List<String> assignedEngineers,
     required List<String> assignedPurchaseTeam,
+
+    // ✅ NEW (optional so old code doesn't break)
+    double? latitude,
+    double? longitude,
   }) async {
     final docRef = await _db.collection('sites').add({
       'siteName': siteName,
@@ -74,16 +78,18 @@ class FirestoreService {
       'assignedEngineers': assignedEngineers,
       'assignedPurchaseTeam': assignedPurchaseTeam,
       'createdAt': FieldValue.serverTimestamp(),
+
+      // ✅ NEW FIELDS (safe — will be null if not passed)
+      'latitude': latitude,
+      'longitude': longitude,
+      'radius': 250,
     });
     return docRef.id;
   }
 
   /// Stream ALL sites (owner can see every site regardless of who created it)
   Stream<List<SiteModel>> streamSitesForOwner(String ownerUid) {
-    return _db
-        .collection('sites')
-        .snapshots()
-        .map((snap) {
+    return _db.collection('sites').snapshots().map((snap) {
       final list = snap.docs.map((d) => SiteModel.fromDocument(d)).toList();
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return list;
@@ -96,8 +102,9 @@ class FirestoreService {
         .collection('sites')
         .where('assignedEngineers', arrayContains: uid)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => SiteModel.fromDocument(d)).toList());
+        .map(
+          (snap) => snap.docs.map((d) => SiteModel.fromDocument(d)).toList(),
+        );
   }
 
   /// Stream sites assigned to a specific purchase team member
@@ -106,8 +113,9 @@ class FirestoreService {
         .collection('sites')
         .where('assignedPurchaseTeam', arrayContains: uid)
         .snapshots()
-        .map((snap) =>
-            snap.docs.map((d) => SiteModel.fromDocument(d)).toList());
+        .map(
+          (snap) => snap.docs.map((d) => SiteModel.fromDocument(d)).toList(),
+        );
   }
 
   /// Get a single site by ID
@@ -172,6 +180,8 @@ class FirestoreService {
     required String date,
     required String engineerUid,
   }) async {
+    // We only write to the specific engineer document to avoid permission errors 
+    // on the parent collection/document. Redundant fields enable collection group queries.
     await _db
         .collection('attendance')
         .doc(siteId)
@@ -180,9 +190,12 @@ class FirestoreService {
         .collection('engineers')
         .doc(engineerUid)
         .set({
-      'status': 'present',
-      'markedAt': FieldValue.serverTimestamp(),
-    });
+          'status': 'present', 
+          'markedAt': FieldValue.serverTimestamp(),
+          'siteId': siteId,
+          'date': date,
+          'uid': engineerUid,
+        });
   }
 
   /// Check if engineer already marked attendance for a date
@@ -203,60 +216,65 @@ class FirestoreService {
   }
 
   /// Stream attendance records for an engineer at a site (all dates).
-  /// We use a collection-group query on 'engineers' filtered by UID.
-  /// Fallback: fetch date-by-date. For simplicity we store a flat sub-collection.
+  /// Uses collectionGroup to avoid needing permissions to list the parent 'records' collection.
   Future<List<Map<String, dynamic>>> getAttendanceForEngineer({
     required String siteId,
     required String engineerUid,
   }) async {
-    // We'll scan all date documents under attendance/{siteId}/records/
-    final datesSnap = await _db
-        .collection('attendance')
-        .doc(siteId)
-        .collection('records')
+    final snap = await _db
+        .collectionGroup('engineers')
+        .where('siteId', isEqualTo: siteId)
+        .where('uid', isEqualTo: engineerUid)
         .get();
 
-    final List<Map<String, dynamic>> results = [];
-    for (final dateDoc in datesSnap.docs) {
-      final engDoc = await _db
-          .collection('attendance')
-          .doc(siteId)
-          .collection('records')
-          .doc(dateDoc.id)
-          .collection('engineers')
-          .doc(engineerUid)
-          .get();
-      if (engDoc.exists) {
-        results.add({
-          'date': dateDoc.id,
-          'status': engDoc.data()?['status'] ?? 'present',
-        });
-      }
-    }
+    final results = snap.docs.map((d) {
+      final data = d.data();
+      return {
+        'date': data['date'] ?? d.reference.parent.parent?.id ?? '',
+        'status': data['status'] ?? 'present',
+      };
+    }).toList();
+
     results.sort((a, b) => (b['date'] as String).compareTo(a['date'] as String));
     return results;
   }
 
   /// Get all attendance records for a site (owner view) — returns map of date → list of UIDs
   Future<Map<String, List<String>>> getAttendanceForSite(String siteId) async {
-    final datesSnap = await _db
-        .collection('attendance')
-        .doc(siteId)
-        .collection('records')
+    final snap = await _db
+        .collectionGroup('engineers')
+        .where('siteId', isEqualTo: siteId)
         .get();
 
     final Map<String, List<String>> result = {};
-    for (final dateDoc in datesSnap.docs) {
-      final engsSnap = await _db
-          .collection('attendance')
-          .doc(siteId)
-          .collection('records')
-          .doc(dateDoc.id)
-          .collection('engineers')
-          .get();
-      result[dateDoc.id] = engsSnap.docs.map((d) => d.id).toList();
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final date = data['date'] as String?;
+      if (date != null) {
+        result.putIfAbsent(date, () => []).add(doc.id);
+      }
     }
     return result;
+  }
+
+  /// REAL-TIME: Stream all engineer attendance for a site
+  /// Uses collectionGroup to find records regardless of parent document existence.
+  Stream<Map<String, List<String>>> streamAttendanceForSite(String siteId) {
+    return _db
+        .collectionGroup('engineers')
+        .where('siteId', isEqualTo: siteId)
+        .snapshots()
+        .map((snap) {
+      final Map<String, List<String>> result = {};
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final date = data['date'] as String?;
+        if (date != null) {
+          result.putIfAbsent(date, () => []).add(doc.id);
+        }
+      }
+      return result;
+    });
   }
 
   // ---------------------------------------------------------------------------
@@ -277,10 +295,13 @@ class FirestoreService {
         .collection('purchase')
         .doc(memberUid)
         .set({
-      'status': 'present',
-      'markedAt': FieldValue.serverTimestamp(),
-      'role': 'purchase_team',
-    });
+          'status': 'present',
+          'markedAt': FieldValue.serverTimestamp(),
+          'role': 'purchase_team',
+          'siteId': siteId,
+          'date': date,
+          'uid': memberUid,
+        });
   }
 
   /// Check if a purchase team member already marked attendance for a date
@@ -305,68 +326,69 @@ class FirestoreService {
     required String siteId,
     required String memberUid,
   }) async {
-    final datesSnap = await _db
-        .collection('attendance')
-        .doc(siteId)
-        .collection('records')
+    final snap = await _db
+        .collectionGroup('purchase')
+        .where('siteId', isEqualTo: siteId)
+        .where('uid', isEqualTo: memberUid)
         .get();
 
-    final List<Map<String, dynamic>> results = [];
-    for (final dateDoc in datesSnap.docs) {
-      final doc = await _db
-          .collection('attendance')
-          .doc(siteId)
-          .collection('records')
-          .doc(dateDoc.id)
-          .collection('purchase')
-          .doc(memberUid)
-          .get();
-      if (doc.exists) {
-        results.add({
-          'date': dateDoc.id,
-          'status': doc.data()?['status'] ?? 'present',
-        });
-      }
-    }
+    final results = snap.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'date': data['date'] ?? doc.reference.parent.parent?.id ?? '',
+        'status': data['status'] ?? 'present',
+      };
+    }).toList();
+
     results.sort((a, b) => (b['date'] as String).compareTo(a['date'] as String));
     return results;
   }
 
   /// Get all purchase team attendance for a site (owner view) — date → list of UIDs
-  Future<Map<String, List<String>>> getPurchaseAttendanceForSite(String siteId) async {
-    final datesSnap = await _db
-        .collection('attendance')
-        .doc(siteId)
-        .collection('records')
+  Future<Map<String, List<String>>> getPurchaseAttendanceForSite(
+    String siteId,
+  ) async {
+    final snap = await _db
+        .collectionGroup('purchase')
+        .where('siteId', isEqualTo: siteId)
         .get();
 
     final Map<String, List<String>> result = {};
-    for (final dateDoc in datesSnap.docs) {
-      final snap = await _db
-          .collection('attendance')
-          .doc(siteId)
-          .collection('records')
-          .doc(dateDoc.id)
-          .collection('purchase')
-          .get();
-      if (snap.docs.isNotEmpty) {
-        result[dateDoc.id] = snap.docs.map((d) => d.id).toList();
+    for (final doc in snap.docs) {
+      final data = doc.data();
+      final date = data['date'] as String?;
+      if (date != null) {
+        result.putIfAbsent(date, () => []).add(doc.id);
       }
     }
     return result;
   }
 
+  /// REAL-TIME: Stream all purchase attendance for a site
+  Stream<Map<String, List<String>>> streamPurchaseAttendanceForSite(String siteId) {
+    return _db
+        .collectionGroup('purchase')
+        .where('siteId', isEqualTo: siteId)
+        .snapshots()
+        .map((snap) {
+      final Map<String, List<String>> result = {};
+      for (final doc in snap.docs) {
+        final data = doc.data();
+        final date = data['date'] as String?;
+        if (date != null) {
+          result.putIfAbsent(date, () => []).add(doc.id);
+        }
+      }
+      return result;
+    });
+  }
 
   Future<void> postAnnouncement({
     required String siteId,
     required String message,
     required String postedBy,
   }) async {
-    await _db
-        .collection('announcements')
-        .doc(siteId)
-        .collection('posts')
-        .add({
+    await _db.collection('announcements').doc(siteId).collection('posts').add({
       'message': message,
       'postedBy': postedBy,
       'createdAt': FieldValue.serverTimestamp(),
@@ -411,15 +433,15 @@ class FirestoreService {
         .doc(siteId)
         .collection('orders')
         .add({
-      'itemName': itemName,
-      'quantity': quantity,
-      'estimatedCost': estimatedCost,
-      'notes': notes ?? '',
-      'submittedBy': submittedBy,
-      'status': 'pending',
-      'createdAt': FieldValue.serverTimestamp(),
-      'reviewedAt': null,
-    });
+          'itemName': itemName,
+          'quantity': quantity,
+          'estimatedCost': estimatedCost,
+          'notes': notes ?? '',
+          'submittedBy': submittedBy,
+          'status': 'pending',
+          'createdAt': FieldValue.serverTimestamp(),
+          'reviewedAt': null,
+        });
   }
 
   /// Stream all purchase orders for a site (owner view)
@@ -466,10 +488,7 @@ class FirestoreService {
         .doc(siteId)
         .collection('orders')
         .doc(orderId)
-        .update({
-      'status': status,
-      'reviewedAt': FieldValue.serverTimestamp(),
-    });
+        .update({'status': status, 'reviewedAt': FieldValue.serverTimestamp()});
   }
 
   // ===========================================================================
@@ -478,23 +497,21 @@ class FirestoreService {
 
   Stream<QuerySnapshot> streamMaterialRequests(String siteId) {
     return _db
-      .collection('materialRequests')
-      .doc(siteId)
-      .collection('requests')
-      .snapshots();
+        .collection('materialRequests')
+        .doc(siteId)
+        .collection('requests')
+        .snapshots();
   }
 
   Stream<QuerySnapshot> streamAllMaterialRequests() {
-    return _db
-      .collectionGroup('requests')
-      .snapshots();
+    return _db.collectionGroup('requests').snapshots();
   }
 
   Stream<QuerySnapshot> streamAllMaterialRequestsByStatus(String status) {
     return _db
-      .collectionGroup('requests')
-      .where('status', isEqualTo: status)
-      .snapshots();
+        .collectionGroup('requests')
+        .where('status', isEqualTo: status)
+        .snapshots();
   }
 
   Stream<QuerySnapshot> streamMyMaterialRequests({
@@ -502,11 +519,11 @@ class FirestoreService {
     required String uid,
   }) {
     return _db
-      .collection('materialRequests')
-      .doc(siteId)
-      .collection('requests')
-      .where('uploadedBy', isEqualTo: uid)
-      .snapshots();
+        .collection('materialRequests')
+        .doc(siteId)
+        .collection('requests')
+        .where('uploadedBy', isEqualTo: uid)
+        .snapshots();
   }
 
   // Update material request status (owner approve/reject)
@@ -524,11 +541,11 @@ class FirestoreService {
     };
     if (rejectionReason != null) data['rejectionReason'] = rejectionReason;
     await _db
-      .collection('materialRequests')
-      .doc(siteId)
-      .collection('requests')
-      .doc(requestId)
-      .update(data);
+        .collection('materialRequests')
+        .doc(siteId)
+        .collection('requests')
+        .doc(requestId)
+        .update(data);
   }
 
   // Add PDF to existing material request (purchase team)
@@ -540,16 +557,16 @@ class FirestoreService {
     String? quotationNote,
   }) async {
     await _db
-      .collection('materialRequests')
-      .doc(siteId)
-      .collection('requests')
-      .doc(requestId)
-      .update({
-        'purchaseOrderPdfURL': pdfUrl,
-        'pdfUploadedBy': uploadedBy,
-        'pdfUploadedAt': FieldValue.serverTimestamp(),
-        'quotationNote': quotationNote ?? '',
-        'status': 'pending_approval',
-      });
+        .collection('materialRequests')
+        .doc(siteId)
+        .collection('requests')
+        .doc(requestId)
+        .update({
+          'purchaseOrderPdfURL': pdfUrl,
+          'pdfUploadedBy': uploadedBy,
+          'pdfUploadedAt': FieldValue.serverTimestamp(),
+          'quotationNote': quotationNote ?? '',
+          'status': 'pending_approval',
+        });
   }
 }

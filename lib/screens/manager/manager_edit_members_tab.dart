@@ -165,12 +165,26 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
         ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
+<<<<<<< Updated upstream
             Text('Edit Members', style: AppTextStyles.h3.copyWith(color: AppColors.onSurface)),
             Text(widget.siteName,
                 style: AppTextStyles.caption, overflow: TextOverflow.ellipsis),
+=======
+            Text('Edit Members', style: AppTextStyles.appBarTitle),
+            Text(
+              widget.siteName,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.onPrimary.withValues(alpha: 0.8),
+                fontSize: 11,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+>>>>>>> Stashed changes
           ],
         ),
+        centerTitle: false,
       ),
       body: _loadingUsers
           ? const Center(
@@ -207,15 +221,15 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
                 return Stack(
                   children: [
                     ListView(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(AppSpacing.screenPadding),
                       children: [
                         // ── SECTION 1: Site Engineers ────────────────────────
-                        _SectionTitle(
+                        const _SectionTitle(
                           icon: Icons.engineering_outlined,
                           label: 'Site Engineers',
                           color: AppColors.primary,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.m),
 
                         // Currently assigned
                         if (_assignedEngineers.isEmpty)
@@ -229,19 +243,21 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
                                     accentColor: AppColors.primary,
                                   )),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.l),
 
                         // Add new engineers
                         if (unassignedEngineers.isNotEmpty) ...[
-                          Text('Add Engineers', style: AppTextStyles.label),
-                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.s),
+                            child: Text('Add Engineers', style: AppTextStyles.label.copyWith(color: AppColors.onSurface.withValues(alpha: 0.7))),
+                          ),
                           _MultiSelectChips(
                             users: unassignedEngineers,
                             selected: _toAddEngineers,
                             accentColor: AppColors.primary,
                             onChanged: () => setState(() {}),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: AppSpacing.m),
                           if (_toAddEngineers.isNotEmpty)
                             PrimaryButton(
                               icon: Icons.person_add_outlined,
@@ -250,17 +266,17 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
                             ),
                         ],
 
-                        const SizedBox(height: 32),
-                        const Divider(color: AppColors.divider, thickness: 1.5),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.xxl),
+                        const Divider(color: AppColors.divider),
+                        const SizedBox(height: AppSpacing.xl),
 
                         // ── SECTION 2: Purchase Team ─────────────────────────
-                        _SectionTitle(
+                        const _SectionTitle(
                           icon: Icons.shopping_cart_outlined,
                           label: 'Purchase Team',
                           color: AppColors.success,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.m),
 
                         // Currently assigned
                         if (_assignedPurchase.isEmpty)
@@ -274,19 +290,21 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
                                     accentColor: AppColors.success,
                                   )),
 
-                        const SizedBox(height: 16),
+                        const SizedBox(height: AppSpacing.l),
 
                         // Add new purchase team members
                         if (unassignedPurchase.isNotEmpty) ...[
-                          Text('Add Purchase Team Members', style: AppTextStyles.label),
-                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 4, bottom: AppSpacing.s),
+                            child: Text('Add Purchase Team Members', style: AppTextStyles.label.copyWith(color: AppColors.onSurface.withValues(alpha: 0.7))),
+                          ),
                           _MultiSelectChips(
                             users: unassignedPurchase,
                             selected: _toAddPurchase,
                             accentColor: AppColors.success,
                             onChanged: () => setState(() {}),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: AppSpacing.m),
                           if (_toAddPurchase.isNotEmpty)
                             PrimaryButton(
                               icon: Icons.group_add_outlined,
@@ -296,7 +314,7 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
                             ),
                         ],
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: AppSpacing.xxl),
                       ],
                     ),
                     if (_saving)
@@ -341,12 +359,12 @@ class _SectionTitle extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
           ),
           child: Icon(icon, color: color, size: 18),
         ),
-        const SizedBox(width: 10),
-        Text(label, style: AppTextStyles.h3),
+        const SizedBox(width: AppSpacing.s),
+        Text(label, style: AppTextStyles.h3.copyWith(color: AppColors.onSurface.withValues(alpha: 0.9))),
       ],
     );
   }
@@ -367,40 +385,41 @@ class _AssignedMemberTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final name = user.name.isNotEmpty ? user.name : user.email;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.s),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: AppColors.card,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
           border: Border.all(color: AppColors.divider),
         ),
         child: Row(
           children: [
             CircleAvatar(
-              radius: 16,
+              radius: 18,
               backgroundColor: accentColor.withValues(alpha: 0.15),
               child: Text(
                 name.isNotEmpty ? name[0].toUpperCase() : '?',
-                style: TextStyle(color: accentColor, fontWeight: FontWeight.w600, fontSize: 13),
+                style: TextStyle(color: accentColor, fontWeight: FontWeight.bold, fontSize: 13),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.m),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500)),
-                  Text(user.email, style: AppTextStyles.caption),
+                  Text(name, style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
+                  Text(user.email, style: AppTextStyles.caption.copyWith(color: AppColors.onSurfaceMuted)),
                 ],
               ),
             ),
             IconButton(
               onPressed: onRemove,
-              icon: const Icon(Icons.remove_circle_outline, color: AppColors.error, size: 22),
+              icon: const Icon(Icons.remove_circle_outline_rounded, color: AppColors.error, size: 20),
               tooltip: 'Remove',
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
+              splashRadius: 20,
             ),
           ],
         ),
@@ -426,11 +445,11 @@ class _MultiSelectChips extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.cardPadding - 2),
       decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+        border: Border.all(color: AppColors.divider.withValues(alpha: 0.8)),
       ),
       child: Wrap(
         spacing: 8,
@@ -449,14 +468,18 @@ class _MultiSelectChips extends StatelessWidget {
               }
               onChanged();
             },
-            selectedColor: accentColor.withValues(alpha: 0.18),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            selectedColor: accentColor.withValues(alpha: 0.12),
             checkmarkColor: accentColor,
-            backgroundColor: AppColors.background,
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             side: BorderSide(color: isSelected ? accentColor : AppColors.divider),
             labelStyle: TextStyle(
               color: isSelected ? accentColor : AppColors.onSurface,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              fontSize: 13,
+              fontSize: 12,
             ),
           );
         }).toList(),

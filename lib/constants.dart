@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 // ---------------------------------------------------------------------------
 // IMPORTANT: Replace the placeholder below with the actual Firebase UID of
 // the pre-created Owner account before releasing the app.
-const String kOwnerUID = 'X7UjcFVXxLdfakc467oMDIxKmvM2';
+const String kOwnerUID = 'BXn7yDKDixMiGrDhwXHjYDrcMcz2';
 const String kManagerUID = 'kMCReLyAE8fEqIrG1MUq3S6gnlu1';
 
 // ---------------------------------------------------------------------------
@@ -109,3 +109,90 @@ class AppTextStyles {
     letterSpacing: 0.5,
   );
 }
+<<<<<<< Updated upstream
+=======
+
+// ---------------------------------------------------------------------------
+// Spacing & Layout
+// ---------------------------------------------------------------------------
+class AppSpacing {
+  AppSpacing._();
+
+  static const double xs = 4.0;
+  static const double s = 8.0;
+  static const double m = 16.0;
+  static const double l = 20.0;
+  static const double xl = 24.0;
+  static const double xxl = 32.0;
+
+  static const double screenPadding = 20.0;
+  static const double cardPadding = 16.0;
+  static const double borderRadiusSm = 8.0;
+  static const double borderRadius = 12.0;
+  static const double borderRadiusLg = 16.0;
+}
+
+class AppTone {
+  final Color foreground;
+  final Color background;
+
+  const AppTone({required this.foreground, required this.background});
+
+  Color border([double alpha = 0.18]) => foreground.withValues(alpha: alpha);
+}
+
+class AppTones {
+  AppTones._();
+
+  static const AppTone primary = AppTone(
+    foreground: AppColors.primary,
+    background: AppColors.primaryTint,
+  );
+  static const AppTone success = AppTone(
+    foreground: AppColors.success,
+    background: AppColors.successSurface,
+  );
+  static const AppTone warning = AppTone(
+    foreground: AppColors.warning,
+    background: AppColors.warningSurface,
+  );
+  static const AppTone info = AppTone(
+    foreground: AppColors.info,
+    background: AppColors.infoSurface,
+  );
+  static const AppTone danger = AppTone(
+    foreground: AppColors.error,
+    background: AppColors.errorSurface,
+  );
+}
+
+AppTone requestStatusTone(String status) {
+  switch (status) {
+    case 'approved':
+      return AppTones.success;
+    case 'rejected':
+      return AppTones.danger;
+    case 'pending_approval':
+      return AppTones.warning;
+    case 'pending_quotation':
+      return AppTones.info;
+    default:
+      return AppTones.primary;
+  }
+}
+
+AppTone roleTone(String role) {
+  switch (role) {
+    case kRoleOwner:
+      return AppTones.warning;
+    case kRoleManager:
+      return AppTones.primary;
+    case kRolePurchaseTeam:
+      return AppTones.success;
+    case kRoleSiteEngineer:
+      return AppTones.info;
+    default:
+      return AppTones.primary;
+  }
+}
+>>>>>>> Stashed changes

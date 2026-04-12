@@ -4,6 +4,9 @@ class SiteModel {
   final String siteId;
   final String siteName;
   final String location;
+  final double latitude;
+  final double longitude;
+  final double radius;
   final DateTime startDate;
   final String createdBy;
   final List<String> assignedEngineers;
@@ -14,6 +17,9 @@ class SiteModel {
     required this.siteId,
     required this.siteName,
     required this.location,
+    required this.latitude,
+    required this.longitude,
+    required this.radius,
     required this.startDate,
     required this.createdBy,
     required this.assignedEngineers,
@@ -25,12 +31,17 @@ class SiteModel {
     final data = doc.data() as Map<String, dynamic>;
     return SiteModel(
       siteId: doc.id,
-      siteName: data['siteName'] as String? ?? '',
-      location: data['location'] as String? ?? '',
+      siteName: data['siteName'] ?? '',
+      location: data['location'] ?? '',
+      latitude: (data['latitude'] ?? 0).toDouble(),
+      longitude: (data['longitude'] ?? 0).toDouble(),
+      radius: (data['radius'] ?? 250).toDouble(),
       startDate: (data['startDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      createdBy: data['createdBy'] as String? ?? '',
+      createdBy: data['createdBy'] ?? '',
       assignedEngineers: List<String>.from(data['assignedEngineers'] ?? []),
-      assignedPurchaseTeam: List<String>.from(data['assignedPurchaseTeam'] ?? []),
+      assignedPurchaseTeam: List<String>.from(
+        data['assignedPurchaseTeam'] ?? [],
+      ),
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
@@ -39,6 +50,9 @@ class SiteModel {
     return {
       'siteName': siteName,
       'location': location,
+      'latitude': latitude,
+      'longitude': longitude,
+      'radius': radius,
       'startDate': Timestamp.fromDate(startDate),
       'createdBy': createdBy,
       'assignedEngineers': assignedEngineers,

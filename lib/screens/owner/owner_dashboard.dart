@@ -71,29 +71,37 @@ class _ViewSitesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.screenPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.screenPadding),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [AppColors.warning.withValues(alpha: 0.1), AppColors.warning.withValues(alpha: 0.02)],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
+<<<<<<< Updated upstream
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.warning.withValues(alpha: 0.15)),
+=======
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+              border: Border.all(
+                color: AppColors.warning.withValues(alpha: 0.15),
+              ),
+>>>>>>> Stashed changes
             ),
             child: Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(AppSpacing.cardPadding - 4),
                   decoration: BoxDecoration(
                     color: AppColors.warning.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                   ),
+<<<<<<< Updated upstream
                   child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.warning, size: 28),
                 ),
                 const SizedBox(width: 16),
@@ -104,11 +112,37 @@ class _ViewSitesTab extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text('Read-only access to all sites', style: AppTextStyles.caption),
                   ],
+=======
+                  child: const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color: AppColors.warning,
+                    size: 26,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.m),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Owner View',
+                        style: AppTextStyles.h3.copyWith(
+                          color: AppColors.warning,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Read-only access to all sites',
+                        style: AppTextStyles.caption,
+                      ),
+                    ],
+                  ),
+>>>>>>> Stashed changes
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: AppSpacing.xxl),
           const SectionHeader(title: 'All Sites'),
           StreamBuilder<List<SiteModel>>(
             stream: firestoreService.streamSitesForOwner(uid),
@@ -165,9 +199,9 @@ class _SiteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.m),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
         onTap: () {
           Navigator.push(
             context,
@@ -177,15 +211,15 @@ class _SiteCard extends StatelessWidget {
           );
         },
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
             border: Border.all(color: AppColors.divider),
             boxShadow: [
               BoxShadow(
-                color: AppColors.onSurface.withValues(alpha: 0.05),
-                blurRadius: 16,
+                color: AppColors.onSurface.withValues(alpha: 0.04),
+                blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -196,11 +230,19 @@ class _SiteCard extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                 ),
+<<<<<<< Updated upstream
                 child: const Icon(Icons.location_city, color: AppColors.primary, size: 24),
+=======
+                child: const Icon(
+                  Icons.location_city,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
+>>>>>>> Stashed changes
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.m),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -209,9 +251,10 @@ class _SiteCard extends StatelessWidget {
                       site.siteName,
                       style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
+<<<<<<< Updated upstream
                         const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onSurfaceMuted),
                         const SizedBox(width: 4),
                         Expanded(child: Text(site.location, style: AppTextStyles.caption, overflow: TextOverflow.ellipsis)),
@@ -229,6 +272,31 @@ class _SiteCard extends StatelessWidget {
                 ),
               ),
               const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.onSurfaceMuted),
+=======
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 14,
+                          color: AppColors.onSurfaceMuted,
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: Text(
+                            site.location,
+                            style: AppTextStyles.caption,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: AppColors.onSurfaceMuted.withValues(alpha: 0.7),
+              ),
+>>>>>>> Stashed changes
             ],
           ),
         ),

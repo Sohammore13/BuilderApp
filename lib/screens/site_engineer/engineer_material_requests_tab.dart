@@ -67,7 +67,15 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
   }
 
   Future<void> _submitRequest() async {
+<<<<<<< Updated upstream
     if (_selectedImageBytes == null || _currentUid == null || _currentUserName == null) return;
+=======
+    if (_selectedImageBytes == null ||
+        _currentUid == null ||
+        _currentUserName == null) {
+      return;
+    }
+>>>>>>> Stashed changes
 
     setState(() => _isUploading = true);
 
@@ -192,63 +200,109 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
           children: [
             // Request Header
             Container(
-              padding: const EdgeInsets.all(16),
-              color: AppColors.surface,
+              padding: const EdgeInsets.all(AppSpacing.screenPadding),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                border: Border(bottom: BorderSide(color: AppColors.divider.withValues(alpha: 0.5))),
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (_selectedImageBytes == null)
                     PrimaryButton(
-                      icon: Icons.add_photo_alternate,
-                      label: 'New Request',
+                      icon: Icons.add_photo_alternate_outlined,
+                      label: 'New Material Request',
                       onPressed: _showImagePickerOptions,
+                      height: 52,
                     )
                   else ...[
                     // Preview
+<<<<<<< Updated upstream
                     Stack(
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.memory(_selectedImageBytes!, height: 200, width: double.infinity, fit: BoxFit.cover),
+=======
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.onSurface.withValues(alpha: 0.08),
+                            blurRadius: 15,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                        child: Image.memory(
+                          _selectedImageBytes!,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+>>>>>>> Stashed changes
                         ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.m),
                     Row(
                       children: [
                         Expanded(
                           child: SecondaryButton(
                             onPressed: _showImagePickerOptions,
-                            icon: Icons.edit_outlined,
-                            label: 'Change',
+                            icon: Icons.refresh_rounded,
+                            label: 'Change Image',
                             color: AppColors.primary,
-                            height: 48,
+                            height: 44,
                           ),
                         ),
-                        const SizedBox(width: 10),
+                        const SizedBox(width: AppSpacing.s),
                         SizedBox(
-                          width: 52,
-                          height: 48,
+                          width: 48,
+                          height: 44,
                           child: OutlinedButton(
                             onPressed: _clearSelectedImage,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.error,
+<<<<<<< Updated upstream
                               side: BorderSide(color: AppColors.error.withValues(alpha: 0.6)),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+=======
+                              side: BorderSide(
+                                color: AppColors.error.withValues(alpha: 0.3),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                              ),
+>>>>>>> Stashed changes
                               padding: EdgeInsets.zero,
                             ),
-                            child: const Icon(Icons.delete_outline, size: 20),
+                            child: const Icon(Icons.delete_outline_rounded, size: 20),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.m),
                     if (_isUploading)
+<<<<<<< Updated upstream
                       const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)))
+=======
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        ),
+                      )
+>>>>>>> Stashed changes
                     else
                       PrimaryButton(
                         onPressed: _submitRequest,
-                        label: 'Submit Request',
+                        icon: Icons.cloud_upload_outlined,
+                        label: 'Submit for Quote',
                         color: AppColors.success,
+                        height: 48,
                       ),
                   ],
                 ],
@@ -281,7 +335,7 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.screenPadding),
                     itemCount: docs.length,
                     itemBuilder: (context, index) {
                       final doc = docs[index];
@@ -292,46 +346,110 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                       final rejectionReason = data['rejectionReason'] as String?;
                       final canDelete = status == 'pending_quotation' || status == 'rejected';
 
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        color: AppColors.card,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: AppColors.divider),
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: AppSpacing.m),
+                        decoration: BoxDecoration(
+                          color: AppColors.card,
+                          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+                          border: Border.all(color: AppColors.divider),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.onSurface.withValues(alpha: 0.02),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: InkWell(
+<<<<<<< Updated upstream
                           borderRadius: BorderRadius.circular(12),
+=======
+                          borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+>>>>>>> Stashed changes
                           onTap: imageUrl != null ? () => _viewFullScreenImage(imageUrl) : null,
                           child: Padding(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(AppSpacing.cardPadding),
                             child: Row(
                               children: [
                                 if (imageUrl != null)
                                   ClipRRect(
+<<<<<<< Updated upstream
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
                                   )
                                 else 
                                   const Icon(Icons.image_not_supported),
                                 const SizedBox(width: 12),
+=======
+                                    borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+                                    child: Image.network(
+                                      imageUrl,
+                                      width: 56,
+                                      height: 56,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                else
+                                  Container(
+                                    width: 56,
+                                    height: 56,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.onSurface.withValues(alpha: 0.05),
+                                      borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+                                    ),
+                                    child: const Icon(Icons.image_not_supported_outlined, color: AppColors.onSurfaceMuted, size: 20),
+                                  ),
+                                const SizedBox(width: AppSpacing.m),
+>>>>>>> Stashed changes
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+<<<<<<< Updated upstream
                                       Text('Request #${doc.id.substring(0, 6).toUpperCase()}', style: AppTextStyles.h4),
                                       if (createdAt != null)
                                         Text(DateFormat('MMM dd, hh:mm a').format(createdAt), style: AppTextStyles.caption),
                                       if (status == 'rejected' && rejectionReason != null)
                                         Text('Rejected: $rejectionReason', style: AppTextStyles.caption.copyWith(color: AppColors.error)),
+=======
+                                      Text(
+                                        'Request #${doc.id.substring(0, 6).toUpperCase()}',
+                                        style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
+                                      ),
+                                      if (createdAt != null)
+                                        Text(
+                                          DateFormat('MMM dd, hh:mm a').format(createdAt),
+                                          style: AppTextStyles.caption.copyWith(color: AppColors.onSurfaceMuted),
+                                        ),
+                                      if (status == 'rejected' && rejectionReason != null)
+                                        Padding(
+                                          padding: const EdgeInsets.only(top: 4),
+                                          child: Text(
+                                            'Reason: $rejectionReason',
+                                            style: AppTextStyles.caption.copyWith(color: AppColors.error, fontSize: 11),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+>>>>>>> Stashed changes
                                     ],
                                   ),
                                 ),
+                                const SizedBox(width: AppSpacing.s),
                                 if (canDelete)
                                   IconButton(
                                     tooltip: 'Delete',
+<<<<<<< Updated upstream
                                     icon: const Icon(Icons.delete_outline, color: AppColors.error),
+=======
+                                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
+>>>>>>> Stashed changes
                                     onPressed: () => _deleteRequest(doc.id),
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(),
+                                    splashRadius: 20,
                                   ),
+                                const SizedBox(width: AppSpacing.s),
                                 _statusBadge(status),
                               ],
                             ),

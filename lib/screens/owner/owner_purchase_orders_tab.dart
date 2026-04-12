@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
@@ -120,6 +121,7 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
               icon: const Icon(Icons.arrow_back_ios, size: 20),
               onPressed: () => Navigator.of(context).pop(),
             ),
+<<<<<<< Updated upstream
           ),
           body: Center(
             child: InteractiveViewer(
@@ -132,6 +134,29 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                     SizedBox(height: 12),
                     Text('Failed to load image', style: TextStyle(color: Colors.white)),
                   ],
+=======
+            body: Center(
+              child: InteractiveViewer(
+                child: Image.network(
+                  url,
+                  errorBuilder: (context, error, stackTrace) => Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: AppColors.onSurface,
+                        size: 40,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Failed to load image',
+                        style: AppTextStyles.body.copyWith(
+                          color: AppColors.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+>>>>>>> Stashed changes
                 ),
               ),
             ),
@@ -166,9 +191,10 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
         final historyDocs = allDocs.where((d) => ['approved', 'rejected'].contains((d.data() as Map<String, dynamic>)['status'])).toList();
 
         return ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.screenPadding),
           children: [
             if (pendingDocs.isNotEmpty) ...[
+<<<<<<< Updated upstream
               Text('PENDING APPROVAL', style: AppTextStyles.label.copyWith(color: AppColors.primary)),
               const SizedBox(height: 12),
               ...pendingDocs.map((doc) => _buildRequestCard(doc, isPending: true)),
@@ -178,11 +204,56 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
               Text('HISTORY', style: AppTextStyles.label),
               const SizedBox(height: 12),
               ...historyDocs.map((doc) => _buildRequestCard(doc, isPending: false)),
+=======
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  'PENDING APPROVAL',
+                  style: AppTextStyles.label.copyWith(
+                      color: AppColors.primary, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.m),
+              ...pendingDocs.map(
+                (doc) => _buildRequestCard(doc, isPending: true),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+            ],
+            if (historyDocs.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text('HISTORY',
+                    style: AppTextStyles.label.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.onSurface.withValues(alpha: 0.6))),
+              ),
+              const SizedBox(height: AppSpacing.m),
+              ...historyDocs.map(
+                (doc) => _buildRequestCard(doc, isPending: false),
+              ),
+>>>>>>> Stashed changes
             ],
             if (allDocs.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 100),
+<<<<<<< Updated upstream
                 child: Center(child: Text('No material requests found.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted))),
+=======
+                child: Center(
+                  child: Column(
+                    children: [
+                      const Icon(Icons.inventory_2_outlined,
+                          size: 48, color: AppColors.onSurfaceMuted),
+                      const SizedBox(height: 12),
+                      Text(
+                        'No requests found.',
+                        style: AppTextStyles.body
+                            .copyWith(color: AppColors.onSurfaceMuted),
+                      ),
+                    ],
+                  ),
+                ),
+>>>>>>> Stashed changes
               ),
           ],
         );
@@ -201,16 +272,22 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
     final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
     final rejectionReason = data['rejectionReason'] as String?;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      color: AppColors.card,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.divider),
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.m),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
+        border: Border.all(color: AppColors.divider),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.onSurface.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -220,18 +297,51 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                 if (imageUrl != null)
                   GestureDetector(
                     onTap: () => _viewImage(imageUrl),
+<<<<<<< Updated upstream
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(imageUrl, width: 70, height: 70, fit: BoxFit.cover),
+=======
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.borderRadiusSm),
+                        border: Border.all(
+                            color: AppColors.divider.withValues(alpha: 0.5)),
+                      ),
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.borderRadiusSm),
+                        child: Image.network(
+                          imageUrl,
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+>>>>>>> Stashed changes
                     ),
+                  )
+                else
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: AppColors.onSurface.withValues(alpha: 0.05),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.borderRadiusSm),
+                    ),
+                    child: const Icon(Icons.image_not_supported_outlined,
+                        color: AppColors.onSurfaceMuted, size: 20),
                   ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.m),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       FutureBuilder<String>(
                         future: _getSiteName(siteId),
+<<<<<<< Updated upstream
                         builder: (context, snap) => Text(snap.data ?? 'Loading...', style: AppTextStyles.h4),
                       ),
                       const SizedBox(height: 4),
@@ -240,6 +350,30 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                         FutureBuilder<String>(
                           future: _getUserName(purchaseUid),
                           builder: (context, snap) => Text('Purchase: ${snap.data ?? '...'}', style: AppTextStyles.caption),
+=======
+                        builder: (context, snap) => Text(
+                          snap.data ?? '...',
+                          style: AppTextStyles.body
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Engineer: $engineerName',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (purchaseUid != null)
+                        FutureBuilder<String>(
+                          future: _getUserName(purchaseUid),
+                          builder: (context, snap) => Text(
+                            'Purchase: ${snap.data ?? '...'}',
+                            style: AppTextStyles.caption.copyWith(
+                                color: AppColors.onSurfaceMuted, fontSize: 10),
+                          ),
+>>>>>>> Stashed changes
                         ),
                     ],
                   ),
@@ -247,6 +381,7 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                 _statusBadge(status),
               ],
             ),
+<<<<<<< Updated upstream
             if (data['quotationNote'] != null && (data['quotationNote'] as String).isNotEmpty) ...[
               const SizedBox(height: 10),
               Container(
@@ -258,68 +393,130 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
                   children: [
                     Text('Purchase Remark:', style: AppTextStyles.label.copyWith(fontSize: 11)),
                     Text(data['quotationNote'], style: AppTextStyles.body.copyWith(fontSize: 13)),
+=======
+            if (data['quotationNote'] != null &&
+                (data['quotationNote'] as String).isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.m),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.s),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.borderRadiusSm),
+                  border: Border.all(color: AppColors.divider),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'PURCHASE REMARK:',
+                      style: AppTextStyles.caption.copyWith(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.onSurfaceMuted),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      data['quotationNote'],
+                      style: AppTextStyles.body.copyWith(fontSize: 12),
+                    ),
+>>>>>>> Stashed changes
                   ],
                 ),
               ),
             ],
             if (status == 'rejected' && rejectionReason != null) ...[
+<<<<<<< Updated upstream
               const SizedBox(height: 10),
               Text('Rejection Reason: $rejectionReason', style: AppTextStyles.caption.copyWith(color: AppColors.error)),
+=======
+              const SizedBox(height: AppSpacing.s),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.05),
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.borderRadiusSm),
+                  border:
+                      Border.all(color: AppColors.error.withValues(alpha: 0.1)),
+                ),
+                child: Text(
+                  'Rejection Reason: $rejectionReason',
+                  style: AppTextStyles.caption
+                      .copyWith(color: AppColors.error, fontSize: 11),
+                ),
+              ),
+>>>>>>> Stashed changes
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.m),
             Row(
               children: [
                 if (imageUrl != null)
                   Expanded(
                     child: SecondaryButton(
                       onPressed: () => _viewFile(imageUrl),
-                      icon: Icons.image,
-                      label: 'View Requirement',
+                      icon: Icons.assignment_outlined,
+                      label: 'Requirement',
                       isFullWidth: false,
+                      height: 40,
                     ),
                   ),
                 if (pdfUrl != null) ...[
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.s),
                   Expanded(
                     child: SecondaryButton(
                       onPressed: () => _viewFile(pdfUrl),
-                      icon: Icons.description,
-                      label: 'View Quotation',
+                      icon: Icons.receipt_long_outlined,
+                      label: 'Quotation',
                       isFullWidth: false,
+                      height: 40,
+                      color: AppColors.primary,
                     ),
                   ),
                 ],
               ],
             ),
             if (isPending) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.m),
               Row(
                 children: [
                   Expanded(
                     child: PrimaryButton(
+<<<<<<< Updated upstream
                       onPressed: () => _updateStatus(siteId, doc.id, 'approved'),
+=======
+                      onPressed: () =>
+                          _updateStatus(siteId, doc.id, 'approved'),
+                      icon: Icons.check_circle_outline,
+>>>>>>> Stashed changes
                       label: 'Approve',
                       color: AppColors.success,
+                      height: 44,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.s),
                   Expanded(
                     child: PrimaryButton(
                       onPressed: () => _showRejectionDialog(siteId, doc.id),
+                      icon: Icons.cancel_outlined,
                       label: 'Reject',
                       color: AppColors.error,
+                      height: 44,
                     ),
                   ),
                 ],
               ),
             ],
             if (createdAt != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.s),
               Align(
                 alignment: Alignment.bottomRight,
                 child: Text(
-                  'Submitted: ${createdAt.day}/${createdAt.month}/${createdAt.year}',
-                  style: AppTextStyles.caption.copyWith(fontSize: 10),
+                  'Submitted: ${DateFormat('MMM dd, yyyy').format(createdAt)}',
+                  style: AppTextStyles.caption.copyWith(
+                      fontSize: 9, color: AppColors.onSurfaceMuted),
                 ),
               ),
             ],
@@ -345,3 +542,4 @@ class _OwnerPurchaseOrdersTabState extends State<OwnerPurchaseOrdersTab> {
     );
   }
 }
+

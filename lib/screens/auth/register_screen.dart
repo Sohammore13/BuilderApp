@@ -119,55 +119,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Column(
               children: [
                 // Back button row
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface),
-                        onPressed: () => Navigator.of(context).pop(),
+                Row(
+                  children: [
+                    IconButton(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.screenPadding,
+                        vertical: AppSpacing.m,
                       ),
-                    ],
-                  ),
-                ),
-
-                Expanded(
+                      alignment: Alignment.centerLeft,
+                      icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface, size: 20),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),                Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
+                          const SizedBox(height: AppSpacing.m),
                           // Header
                           Row(
                             children: [
                               Container(
-                                width: 48,
-                                height: 48,
+                                width: 44,
+                                height: 44,
                                 decoration: BoxDecoration(
                                   gradient: const LinearGradient(
                                     colors: [AppColors.accentLight, AppColors.accent],
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                   ),
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                                 ),
-                                child: const Icon(Icons.person_add, color: Colors.white, size: 24),
+                                child: const Icon(Icons.person_add, color: Colors.white, size: 22),
                               ),
-                              const SizedBox(width: 14),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Create Account', style: AppTextStyles.h2),
-                                  Text('Join BuilderPro', style: AppTextStyles.caption),
-                                ],
+                              const SizedBox(width: AppSpacing.m),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Create Account', style: AppTextStyles.h2),
+                                    Text('Join BuilderPro', style: AppTextStyles.caption),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 32),
+                          const SizedBox(height: AppSpacing.xxl),
 
                           // Name
                           BuilderTextField(
@@ -182,7 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.m),
 
                           // Email
                           BuilderTextField(
@@ -198,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.m),
 
                           // Password
                           BuilderTextField(
@@ -222,7 +224,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             },
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.m),
 
                           if (_allowRoleChange)
                             DropdownButtonFormField<String>(
@@ -274,8 +276,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                                   decoration: BoxDecoration(
+<<<<<<< Updated upstream
                                     color: AppColors.primaryTint,
                                     borderRadius: BorderRadius.circular(18),
                                     border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
@@ -285,53 +288,87 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     style: AppTextStyles.caption.copyWith(
                                       color: AppColors.primary,
                                       fontWeight: FontWeight.bold,
+=======
+                                    color: roleChipTone.background,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: roleChipTone.border()),
+                                  ),
+                                  child: Text(
+                                    _roleLabel.toUpperCase(),
+                                    style: AppTextStyles.label.copyWith(
+                                      color: roleChipTone.foreground,
+                                      letterSpacing: 0.5,
+                                      fontSize: 10,
+>>>>>>> Stashed changes
                                     ),
                                   ),
                                 ),
                               ],
                             ),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.m),
 
                           // Role info banner
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(AppSpacing.m),
                             decoration: BoxDecoration(
+<<<<<<< Updated upstream
                               color: AppColors.primary.withValues(alpha: 0.08),
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+=======
+                              color: AppColors.infoSurface,
+                              borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                              border: Border.all(color: AppTones.info.border()),
+>>>>>>> Stashed changes
                             ),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+<<<<<<< Updated upstream
                                 const Icon(Icons.info_outline, color: AppColors.primary, size: 16),
                                 const SizedBox(width: 8),
+=======
+                                const Icon(Icons.info_outline, color: AppColors.info, size: 16),
+                                const SizedBox(width: AppSpacing.s),
+>>>>>>> Stashed changes
                                 Expanded(
                                   child: Text(
                                     _allowRoleChange
                                         ? 'Owner and Manager accounts are created by the developer only.'
                                         : 'Owner accounts are created by the developer only.',
+<<<<<<< Updated upstream
                                     style: AppTextStyles.caption.copyWith(color: AppColors.primary),
+=======
+                                    style: AppTextStyles.body.copyWith(color: AppColors.info, fontSize: 13),
+>>>>>>> Stashed changes
                                   ),
                                 ),
                               ],
                             ),
                           ),
 
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.m),
 
                           // Error message
                           if (_errorMessage != null)
                             Container(
-                              padding: const EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(AppSpacing.m),
                               decoration: BoxDecoration(
+<<<<<<< Updated upstream
                                 color: AppColors.error.withValues(alpha: 0.05),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(color: AppColors.error.withValues(alpha: 0.2)),
+=======
+                                color: AppColors.errorSurface,
+                                borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                                border: Border.all(color: AppTones.danger.border()),
+>>>>>>> Stashed changes
                               ),
                               child: Row(
                                 children: [
                                   const Icon(Icons.error_outline, color: AppColors.error, size: 18),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: AppSpacing.s),
                                   Expanded(
                                     child: Text(
                                       _errorMessage!,
@@ -342,7 +379,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               ),
                             ),
 
-                          const SizedBox(height: 28),
+                          const SizedBox(height: AppSpacing.xl),
 
                           // Register button
                           PrimaryButton(
@@ -352,7 +389,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             icon: Icons.person_add_outlined,
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSpacing.xl),
 
                           Center(
                             child: TextButton(
@@ -362,7 +399,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: AppSpacing.xl),
                         ],
                       ),
                     ),

@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
+import '../../services/geofence_service.dart';
 import '../../widgets/common_widgets.dart';
 
 class EngineerAttendanceTab extends StatefulWidget {
@@ -51,23 +53,49 @@ class _EngineerAttendanceTabState extends State<EngineerAttendanceTab> {
 
   Future<void> _markPresent() async {
     setState(() => _marking = true);
+
     try {
+      // TODO: Fetch site data (you may already have this)
+      final siteDoc = await FirebaseFirestore.instance
+          .collection('sites')
+          .doc(widget.siteId)
+          .get();
+
+      final siteData = siteDoc.data()!;
+
+      final double siteLat = (siteData['latitude'] ?? 0).toDouble();
+      final double siteLng = (siteData['longitude'] ?? 0).toDouble();
+      final double radius = (siteData['radius'] ?? 250).toDouble();
+
+      // ✅ Geofence check
+      final isInside = await GeofenceService.isWithinRadius(
+        siteLat: siteLat,
+        siteLng: siteLng,
+        radiusInMeters: radius,
+      );
+
+      if (!isInside) {
+        throw Exception("You are not at the site location");
+      }
+
+      // ✅ If inside → mark attendance
       await _firestoreService.markAttendance(
         siteId: widget.siteId,
         date: _todayStr,
         engineerUid: _uid,
       );
+
       setState(() {
         _markedToday = true;
-        // Add to history if not already
         if (!_history.any((h) => h['date'] == _todayStr)) {
           _history.insert(0, {'date': _todayStr, 'status': 'present'});
         }
       });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Attendance marked for today!'),
+            content: Text('Attendance marked successfully (within site area)'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -75,7 +103,10 @@ class _EngineerAttendanceTabState extends State<EngineerAttendanceTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(e.toString()),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -100,59 +131,74 @@ class _EngineerAttendanceTabState extends State<EngineerAttendanceTab> {
       },
       color: AppColors.primary,
       child: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.screenPadding),
         children: [
           // Today's attendance card
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: _markedToday
-                    ? [AppColors.success.withValues(alpha: 0.15), AppColors.success.withValues(alpha: 0.05)]
-                    : [AppColors.warning.withValues(alpha: 0.15), AppColors.warning.withValues(alpha: 0.05)],
+                    ? [
+                        AppColors.success.withValues(alpha: 0.1),
+                        AppColors.success.withValues(alpha: 0.02),
+                      ]
+                    : [
+                        AppColors.warning.withValues(alpha: 0.1),
+                        AppColors.warning.withValues(alpha: 0.02),
+                      ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
               border: Border.all(
-                color: (_markedToday ? AppColors.success : AppColors.warning).withValues(alpha: 0.3),
+                color: (_markedToday ? AppColors.success : AppColors.warning)
+                    .withValues(alpha: 0.2),
               ),
             ),
             child: Column(
               children: [
                 Icon(
-                  _markedToday ? Icons.check_circle : Icons.access_time,
-                  size: 48,
+                  _markedToday ? Icons.check_circle_outline : Icons.schedule_outlined,
+                  size: 44,
                   color: _markedToday ? AppColors.success : AppColors.warning,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.m),
                 Text(
-                  _markedToday ? 'Attendance marked for today' : 'Mark your attendance',
+                  _markedToday
+                      ? 'Attendance Marked'
+                      : 'Mark Attendance',
                   style: AppTextStyles.h3.copyWith(
                     color: _markedToday ? AppColors.success : AppColors.warning,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(_todayStr, style: AppTextStyles.caption),
+                Text(_todayStr, style: AppTextStyles.caption.copyWith(color: AppColors.onSurfaceMuted)),
                 if (!_markedToday) ...[
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.l),
                   PrimaryButton(
                     onPressed: _markPresent,
                     isLoading: _marking,
                     icon: Icons.check,
                     label: 'Mark Present',
                     color: AppColors.success,
+                    height: 48,
                   ),
                 ],
               ],
             ),
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
 
           // Attendance history
-          Text('Attendance History', style: AppTextStyles.h3),
-          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Text('Attendance History',
+                style: AppTextStyles.label.copyWith(fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(height: AppSpacing.m),
 
           if (_history.isEmpty)
             Center(
@@ -160,10 +206,18 @@ class _EngineerAttendanceTabState extends State<EngineerAttendanceTab> {
                 padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Column(
                   children: [
-                    const Icon(Icons.event_busy_outlined, size: 40, color: AppColors.onSurfaceMuted),
+                    const Icon(
+                      Icons.event_busy_outlined,
+                      size: 40,
+                      color: AppColors.onSurfaceMuted,
+                    ),
                     const SizedBox(height: 8),
-                    Text('No attendance records yet',
-                        style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted)),
+                    Text(
+                      'No attendance records yet',
+                      style: AppTextStyles.body.copyWith(
+                        color: AppColors.onSurfaceMuted,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -171,12 +225,12 @@ class _EngineerAttendanceTabState extends State<EngineerAttendanceTab> {
 
           ..._history.map((record) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.only(bottom: AppSpacing.s),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
                 decoration: BoxDecoration(
                   color: AppColors.card,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
                   border: Border.all(color: AppColors.divider),
                 ),
                 child: Row(
@@ -184,25 +238,33 @@ class _EngineerAttendanceTabState extends State<EngineerAttendanceTab> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: AppColors.success.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(8),
+                        color: AppColors.success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
                       ),
-                      child: const Icon(Icons.check_circle, size: 18, color: AppColors.success),
+                      child: const Icon(
+                        Icons.check_circle_outline,
+                        size: 16,
+                        color: AppColors.success,
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(record['date'] ?? '', style: AppTextStyles.body),
+                    const SizedBox(width: AppSpacing.m),
+                    Text(record['date'] ?? '', style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600, fontSize: 13)),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
-                        color: AppColors.success.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
+                        color: AppColors.success.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
                       ),
                       child: Text(
                         'Present',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.success,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
                         ),
                       ),
                     ),

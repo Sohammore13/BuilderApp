@@ -83,33 +83,42 @@ class _ManagerAnnouncementsTabState extends State<ManagerAnnouncementsTab> {
       children: [
         // Compose area
         Container(
-          padding: const EdgeInsets.all(16),
-          decoration: const BoxDecoration(
+          padding: const EdgeInsets.all(AppSpacing.screenPadding),
+          decoration: BoxDecoration(
             color: AppColors.surface,
-            border: Border(bottom: BorderSide(color: AppColors.divider)),
+            border: Border(bottom: BorderSide(color: AppColors.divider.withValues(alpha: 0.5))),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
                 child: TextField(
                   controller: _controller,
                   maxLines: 2,
                   minLines: 1,
-                  style: const TextStyle(color: AppColors.onSurface, fontSize: 14),
+                  style: AppTextStyles.body.copyWith(fontSize: 14),
                   decoration: InputDecoration(
-                    hintText: 'Write an announcement...',
-                    hintStyle: const TextStyle(color: AppColors.onSurfaceMuted),
+                    hintText: 'Share an update...',
+                    hintStyle: AppTextStyles.caption.copyWith(color: AppColors.onSurfaceMuted),
                     filled: true,
                     fillColor: AppColors.background,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                      borderSide: BorderSide(color: AppColors.divider),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                      borderSide: BorderSide(color: AppColors.divider),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                      borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.s),
               _posting
                   ? const SizedBox(
                       width: 44,
@@ -163,7 +172,7 @@ class _ManagerAnnouncementsTabState extends State<ManagerAnnouncementsTab> {
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(AppSpacing.screenPadding),
                 itemCount: docs.length,
                 itemBuilder: (context, index) {
                   final doc = docs[index];
@@ -175,13 +184,20 @@ class _ManagerAnnouncementsTabState extends State<ManagerAnnouncementsTab> {
                       : 'Just now';
 
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.m),
                     child: Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: const EdgeInsets.all(AppSpacing.cardPadding),
                       decoration: BoxDecoration(
                         color: AppColors.card,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
                         border: Border.all(color: AppColors.divider),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.onSurface.withValues(alpha: 0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,25 +207,29 @@ class _ManagerAnnouncementsTabState extends State<ManagerAnnouncementsTab> {
                               Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: AppColors.warning.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(8),
+                                  color: AppColors.warning.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
                                 ),
-                                child: const Icon(Icons.campaign, size: 16, color: AppColors.warning),
+                                child: const Icon(Icons.campaign_outlined, size: 16, color: AppColors.warning),
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: AppSpacing.s),
                               Expanded(
-                                child: Text(timeStr, style: AppTextStyles.caption),
+                                child: Text(timeStr, style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w500)),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 18, color: AppColors.error),
-                                onPressed: () => _delete(doc.id),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
+                              Material(
+                                color: Colors.transparent,
+                                child: IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                                  onPressed: () => _delete(doc.id),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  splashRadius: 20,
+                                ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 8),
-                          Text(message, style: AppTextStyles.body),
+                          const SizedBox(height: AppSpacing.s),
+                          Text(message, style: AppTextStyles.body.copyWith(height: 1.4)),
                         ],
                       ),
                     ),

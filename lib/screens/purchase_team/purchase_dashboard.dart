@@ -33,14 +33,14 @@ class _PurchaseDashboardState extends State<PurchaseDashboard> {
         color: AppColors.primary,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppSpacing.screenPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Welcome banner
-              _PurchaseBanner(),
+              const _PurchaseBanner(),
 
-              const SizedBox(height: 28),
+              const SizedBox(height: AppSpacing.xxl),
 
               // My Sites (real-time)
               const SectionHeader(title: 'My Sites'),
@@ -95,37 +95,40 @@ class _PurchaseDashboardState extends State<PurchaseDashboard> {
 // ---------------------------------------------------------------------------
 
 class _PurchaseBanner extends StatelessWidget {
+  const _PurchaseBanner();
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.screenPadding),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [AppColors.success.withValues(alpha: 0.1), AppColors.success.withValues(alpha: 0.02)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
         border: Border.all(color: AppColors.success.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.cardPadding - 4),
             decoration: BoxDecoration(
               color: AppColors.success.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
             ),
-            child: const Icon(Icons.shopping_cart_outlined, color: AppColors.success, size: 28),
+            child: const Icon(Icons.shopping_cart_outlined, color: AppColors.success, size: 26),
           ),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Purchase Team', style: AppTextStyles.h3.copyWith(color: AppColors.success)),
-              const SizedBox(height: 2),
-              Text('Manage procurement for your assigned sites', style: AppTextStyles.caption),
-            ],
+          const SizedBox(width: AppSpacing.m),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Purchase Team', style: AppTextStyles.h3.copyWith(color: AppColors.success)),
+                const SizedBox(height: 2),
+                Text('Manage procurement for your assigned sites', style: AppTextStyles.caption),
+              ],
+            ),
           ),
         ],
       ),
@@ -140,9 +143,9 @@ class _SiteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.m),
       child: InkWell(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
         onTap: () {
           Navigator.push(
             context,
@@ -155,15 +158,15 @@ class _SiteCard extends StatelessWidget {
           );
         },
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
           decoration: BoxDecoration(
             color: AppColors.card,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
             border: Border.all(color: AppColors.divider),
             boxShadow: [
               BoxShadow(
-                color: AppColors.onSurface.withValues(alpha: 0.05),
-                blurRadius: 16,
+                color: AppColors.onSurface.withValues(alpha: 0.04),
+                blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
             ],
@@ -174,22 +177,22 @@ class _SiteCard extends StatelessWidget {
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.success.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                 ),
-                child: const Icon(Icons.location_city, color: AppColors.success, size: 24),
+                child: const Icon(Icons.location_city, color: AppColors.success, size: 22),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.m),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(site.siteName,
                         style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Row(
                       children: [
                         const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onSurfaceMuted),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: AppSpacing.xs),
                         Expanded(
                           child: Text(site.location, style: AppTextStyles.caption, overflow: TextOverflow.ellipsis),
                         ),
@@ -198,7 +201,7 @@ class _SiteCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.onSurfaceMuted),
+              Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.onSurfaceMuted.withValues(alpha: 0.7)),
             ],
           ),
         ),

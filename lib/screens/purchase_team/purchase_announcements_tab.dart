@@ -39,7 +39,7 @@ class PurchaseAnnouncementsTab extends StatelessWidget {
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.screenPadding),
           itemCount: docs.length,
           itemBuilder: (context, index) {
             final doc = docs[index];
@@ -51,13 +51,21 @@ class PurchaseAnnouncementsTab extends StatelessWidget {
                 : 'Just now';
 
             return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.only(bottom: AppSpacing.m),
               child: Container(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(AppSpacing.cardPadding),
                 decoration: BoxDecoration(
                   color: AppColors.card,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.borderRadiusLg),
                   border: Border.all(color: AppColors.divider),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.onSurface.withValues(alpha: 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,19 +75,26 @@ class PurchaseAnnouncementsTab extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: AppColors.warning.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(8),
+                            color: AppColors.warning.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(
+                                AppSpacing.borderRadiusSm),
                           ),
-                          child: const Icon(Icons.campaign, size: 16, color: AppColors.warning),
+                          child: const Icon(Icons.campaign_outlined,
+                              size: 16, color: AppColors.warning),
                         ),
-                        const SizedBox(width: 8),
-                        Text('Owner', style: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600)),
+                        const SizedBox(width: AppSpacing.s),
+                        Text('Update',
+                            style: AppTextStyles.body.copyWith(
+                                fontWeight: FontWeight.bold, fontSize: 13)),
                         const Spacer(),
-                        Text(timeStr, style: AppTextStyles.caption),
+                        Text(timeStr,
+                            style: AppTextStyles.caption
+                                .copyWith(color: AppColors.onSurfaceMuted)),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    Text(message, style: AppTextStyles.body),
+                    const SizedBox(height: AppSpacing.s),
+                    Text(message,
+                        style: AppTextStyles.body.copyWith(height: 1.4)),
                   ],
                 ),
               ),

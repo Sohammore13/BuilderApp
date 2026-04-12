@@ -204,6 +204,7 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
               icon: const Icon(Icons.arrow_back_ios, size: 20),
               onPressed: () => Navigator.of(context).pop(),
             ),
+<<<<<<< Updated upstream
             title: const Text('Quotation Preview', style: TextStyle(color: Colors.white, fontSize: 16)),
           ),
           body: Center(
@@ -217,6 +218,23 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                     SizedBox(height: 12),
                     Text('Failed to load quotation image', style: TextStyle(color: Colors.white)),
                   ],
+=======
+            body: Center(
+              child: InteractiveViewer(
+                child: Image.network(
+                  url,
+                  errorBuilder: (context, error, stackTrace) => Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.white, size: 40),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Failed to load quotation image',
+                        style: AppTextStyles.body.copyWith(color: Colors.white),
+                      ),
+                    ],
+                  ),
+>>>>>>> Stashed changes
                 ),
               ),
             ),
@@ -226,6 +244,7 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
     }
   }
 
+<<<<<<< Updated upstream
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending_quotation': return Colors.blue;
@@ -235,6 +254,9 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
       default: return AppColors.onSurfaceMuted;
     }
   }
+=======
+
+>>>>>>> Stashed changes
 
   String _formatStatus(String status) {
     return status.replaceAll('_', ' ').toUpperCase();
@@ -253,13 +275,19 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
           icon: const Icon(Icons.arrow_back_ios, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
+<<<<<<< Updated upstream
         title: const Text('Requirement Details', style: TextStyle(fontSize: 18)),
+=======
+        title: Text('Material Requirement', style: AppTextStyles.appBarTitle),
+        centerTitle: true,
+>>>>>>> Stashed changes
         actions: [
           if (_canDeleteRequest)
             IconButton(
               tooltip: 'Delete',
               onPressed: _deleteRequest,
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              icon: const Icon(Icons.delete_outline_rounded,
+                  color: AppColors.error),
             ),
         ],
       ),
@@ -270,20 +298,40 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
               // Zoomable Image
               Expanded(
                 child: Container(
-                  color: Colors.black,
+                  color: Colors.black.withValues(alpha: 0.95),
                   width: double.infinity,
                   child: InteractiveViewer(
                     child: _imageUrl.isNotEmpty
+<<<<<<< Updated upstream
                       ? Image.network(_imageUrl, fit: BoxFit.contain)
                       : const Center(child: Icon(Icons.image_not_supported, color: Colors.white, size: 50)),
+=======
+                        ? Image.network(_imageUrl, fit: BoxFit.contain)
+                        : const Center(
+                            child: Icon(
+                              Icons.image_not_supported_outlined,
+                              color: Colors.white24,
+                              size: 50,
+                            ),
+                          ),
+>>>>>>> Stashed changes
                   ),
                 ),
               ),
 
               // Bottom Control Panel
               Container(
-                color: AppColors.surface,
-                padding: const EdgeInsets.all(20.0),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(AppSpacing.xl),
                 child: SafeArea(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -292,6 +340,7 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+<<<<<<< Updated upstream
                           Text('Status:', style: AppTextStyles.h4),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -307,51 +356,101 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
+=======
+                          Text('Current Status',
+                              style: AppTextStyles.body
+                                  .copyWith(fontWeight: FontWeight.bold)),
+                          AppStatusBadge(
+                            label: _formatStatus(_status),
+                            tone: statusTone,
+>>>>>>> Stashed changes
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-
+                      const SizedBox(height: AppSpacing.xl),
                       if (_status == 'pending_quotation') ...[
                         TextField(
                           controller: _noteController,
+                          style: AppTextStyles.body,
                           decoration: InputDecoration(
-                            hintText: 'Add a remark (e.g. Dealer name)...',
-                            hintStyle: AppTextStyles.caption,
+                            hintText: 'Add dealer info or remarks...',
+                            hintStyle: AppTextStyles.caption
+                                .copyWith(color: AppColors.onSurfaceMuted),
                             filled: true,
                             fillColor: AppColors.background,
+<<<<<<< Updated upstream
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+=======
+                            contentPadding: const EdgeInsets.all(AppSpacing.m),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.borderRadius),
+                              borderSide: BorderSide(color: AppColors.divider),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.borderRadius),
+                              borderSide: BorderSide(color: AppColors.divider),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.borderRadius),
+                              borderSide: BorderSide(color: AppColors.primary),
+                            ),
+>>>>>>> Stashed changes
                           ),
                           maxLines: 2,
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.m),
                         SecondaryButton(
                           onPressed: _pickFile,
+<<<<<<< Updated upstream
                           icon: Icons.upload_file,
                           label: 'Attach Quotation (Imge or PDF)',
                           color: AppColors.primaryLight,
+=======
+                          icon: Icons.attach_file_rounded,
+                          label: 'Attach Quotation (Ref. Image/PDF)',
+                          color: AppColors.primary,
+                          height: 44,
+>>>>>>> Stashed changes
                         ),
                         if (_selectedFilename != null) ...[
-                          const SizedBox(height: 10),
+                          const SizedBox(height: AppSpacing.s),
                           Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
                               color: AppColors.background,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: AppColors.divider),
+                              borderRadius: BorderRadius.circular(
+                                  AppSpacing.borderRadiusSm),
+                              border: Border.all(
+                                  color: AppColors.primary
+                                      .withValues(alpha: 0.2)),
                             ),
                             child: Row(
                               children: [
                                 Icon(
+<<<<<<< Updated upstream
                                   (_selectedFilename?.toLowerCase().endsWith('.pdf') ?? false)
                                       ? Icons.picture_as_pdf_outlined
                                       : Icons.image_outlined,
+=======
+                                  (_selectedFilename?.toLowerCase().endsWith(
+                                            '.pdf',
+                                          ) ??
+                                          false)
+                                      ? Icons.picture_as_pdf_rounded
+                                      : Icons.image_rounded,
+>>>>>>> Stashed changes
                                   color: AppColors.primary,
+                                  size: 18,
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: AppSpacing.s),
                                 Expanded(
                                   child: Text(
                                     _selectedFilename!,
+<<<<<<< Updated upstream
                                     style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -365,29 +464,57 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                                   tooltip: 'Remove',
                                   onPressed: _clearSelectedAttachment,
                                   icon: const Icon(Icons.delete_outline, color: AppColors.error),
+=======
+                                    style: AppTextStyles.caption.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                IconButton(
+                                  tooltip: 'Remove',
+                                  onPressed: _clearSelectedAttachment,
+                                  icon: const Icon(Icons.close_rounded,
+                                      color: AppColors.error, size: 18),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+>>>>>>> Stashed changes
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.l),
                           PrimaryButton(
                             onPressed: _uploadQuotation,
-                            icon: Icons.send,
-                            label: 'Send to Owner for Approval',
+                            icon: Icons.cloud_upload_outlined,
+                            label: 'Submit for Approval',
+                            color: AppColors.success,
+                            height: 52,
                           ),
                         ]
                       ] else ...[
+<<<<<<< Updated upstream
                         if (_existingNote != null && _existingNote!.isNotEmpty) ...[
                           Text('Remark:', style: AppTextStyles.label),
+=======
+                        if (_existingNote != null &&
+                            _existingNote!.isNotEmpty) ...[
+                          Text('PURCHASE REMARK',
+                              style: AppTextStyles.caption.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.onSurfaceMuted)),
+                          const SizedBox(height: 4),
+>>>>>>> Stashed changes
                           Text(_existingNote!, style: AppTextStyles.body),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.l),
                         ],
                         if (_quotationUrl != null)
                           PrimaryButton(
                             onPressed: () => _viewQuotation(_quotationUrl!),
-                            icon: Icons.description,
-                            label: 'View Quotation',
-                            height: 56,
+                            icon: Icons.file_present_rounded,
+                            label: 'View Submitted Quotation',
+                            height: 52,
+                            color: AppColors.primary,
                           ),
                         if (_quotationUrl == null)
                           Text('No Quotation attached.', style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted), textAlign: TextAlign.center),
@@ -398,12 +525,12 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
               ),
             ],
           ),
-
           if (_isUploading)
             Container(
               color: Colors.black54,
               child: const Center(
                 child: CircularProgressIndicator(
+                  strokeWidth: 3,
                   valueColor: AlwaysStoppedAnimation(AppColors.primary),
                 ),
               ),

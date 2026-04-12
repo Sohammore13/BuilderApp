@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:latlong2/latlong.dart';
 import '../../constants.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/firestore_service.dart';
 import '../../models/user_model.dart';
 import 'manager_site_detail.dart';
+import 'location_picker_screen.dart'; // ✅ NEW
 
 class ManagerCreateSiteScreen extends StatefulWidget {
   const ManagerCreateSiteScreen({super.key});
 
   @override
-  State<ManagerCreateSiteScreen> createState() => _ManagerCreateSiteScreenState();
+  State<ManagerCreateSiteScreen> createState() =>
+      _ManagerCreateSiteScreenState();
 }
 
 class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
@@ -19,6 +22,8 @@ class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
   final _locationController = TextEditingController();
   DateTime _startDate = DateTime.now();
   bool _isLoading = false;
+
+  LatLng? _selectedLocation; // ✅ NEW
 
   List<UserModel> _allEngineers = [];
   List<UserModel> _allPurchase = [];
@@ -40,8 +45,6 @@ class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
     final purchase = await _firestoreService.getUsersByRole(kRolePurchaseTeam);
     if (mounted) {
       setState(() {
-        // Exclude the current user (owner) from assignment lists,
-        // and also defensively exclude anyone with the owner role.
         _allEngineers = engineers
             .where((u) => u.uid != currentUid && u.role != kRoleOwner)
             .toList();
@@ -59,25 +62,39 @@ class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
       initialDate: _startDate,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.primary,
-              onSurface: AppColors.onSurface,
-            ),
-          ),
-          child: child!,
-        );
-      },
     );
     if (picked != null) {
       setState(() => _startDate = picked);
     }
   }
 
+  // ✅ NEW: Open map
+  Future<void> _pickLocation() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const LocationPickerScreen()),
+    );
+
+    if (result != null && result is LatLng) {
+      setState(() {
+        _selectedLocation = result;
+      });
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedLocation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select site location on map'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     if (_selectedEngineers.isEmpty && _selectedPurchase.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -92,6 +109,7 @@ class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
 
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
+
       final siteId = await _firestoreService.createSite(
         siteName: _nameController.text.trim(),
         location: _locationController.text.trim(),
@@ -99,10 +117,13 @@ class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
         createdBy: uid,
         assignedEngineers: _selectedEngineers.toList(),
         assignedPurchaseTeam: _selectedPurchase.toList(),
+
+        // ✅ NEW DATA (only works if you add in service)
+        latitude: _selectedLocation!.latitude,
+        longitude: _selectedLocation!.longitude,
       );
 
       if (mounted) {
-        // Replace current screen with site detail
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -140,235 +161,239 @@ class _ManagerCreateSiteScreenState extends State<ManagerCreateSiteScreen> {
       backgroundColor: AppColors.background,
       appBar: const BuilderAppBar(title: 'Create Site', showLogout: false),
       body: _loadingUsers
-          ? const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-              ),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding,
+                vertical: AppSpacing.xl,
+              ),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primary.withValues(alpha: 0.15),
-                            AppColors.primary.withValues(alpha: 0.05),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.add_location_alt, color: AppColors.primary, size: 24),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('New Construction Site', style: AppTextStyles.h3),
-                                SizedBox(height: 2),
-                                Text('Fill in the details below to register a new site',
-                                    style: AppTextStyles.caption),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // Site Name
                     BuilderTextField(
                       controller: _nameController,
                       label: 'Site Name',
                       hint: 'e.g. Greenview Towers',
                       prefixIcon: Icons.location_city_outlined,
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Site name is required' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Site name is required'
+                          : null,
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.m),
 
-                    // Location
                     BuilderTextField(
                       controller: _locationController,
                       label: 'Site Location',
                       hint: 'e.g. Baner, Pune',
                       prefixIcon: Icons.pin_drop_outlined,
-                      validator: (v) =>
-                          (v == null || v.trim().isEmpty) ? 'Location is required' : null,
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Location is required'
+                          : null,
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.m),
 
-                    // Start Date
-                    Text('Start Date', style: AppTextStyles.label),
-                    const SizedBox(height: 8),
+                    // ✅ MAP BUTTON
+                    SecondaryButton(
+                      label: "Select Site Coordinates",
+                      icon: Icons.map_outlined,
+                      onPressed: _pickLocation,
+                    ),
+
+                    // ✅ SHOW SELECTED LOCATION
+                    if (_selectedLocation != null)
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(top: AppSpacing.s, left: 4),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.check_circle,
+                                size: 14, color: AppColors.success),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              "Coordinates Selected: ${_selectedLocation!.latitude.toStringAsFixed(4)}, ${_selectedLocation!.longitude.toStringAsFixed(4)}",
+                              style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.success,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // ── Start Date Picker ──────────────────────────────
+                    Text('Start Date',
+                        style: AppTextStyles.label
+                            .copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: AppSpacing.s),
                     InkWell(
                       onTap: _pickStartDate,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius:
+                          BorderRadius.circular(AppSpacing.borderRadius),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.m,
+                          vertical: 14,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.card,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.borderRadius),
                           border: Border.all(color: AppColors.divider),
                         ),
                         child: Row(
                           children: [
                             const Icon(Icons.calendar_today_outlined,
-                                size: 20, color: AppColors.onSurfaceMuted),
-                            const SizedBox(width: 12),
+                                size: 18, color: AppColors.onSurfaceMuted),
+                            const SizedBox(width: AppSpacing.m),
                             Text(
                               '${_startDate.day}/${_startDate.month}/${_startDate.year}',
                               style: AppTextStyles.body,
                             ),
-                            const Spacer(),
-                            const Icon(Icons.edit_calendar_outlined,
-                                size: 18, color: AppColors.primary),
                           ],
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
 
-                    // Assign Site Engineers
-                    Text('Assign Site Engineers', style: AppTextStyles.label),
-                    const SizedBox(height: 8),
-                    _UserChipSelector(
-                      users: _allEngineers,
-                      selected: _selectedEngineers,
-                      emptyText: 'No site engineers registered yet',
-                      accentColor: AppColors.primary,
-                      onChanged: () => setState(() {}),
-                    ),
+                    // ── Assign Engineers ───────────────────────────────
+                    Text('Assign Site Engineers',
+                        style: AppTextStyles.label
+                            .copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: AppSpacing.s),
+                    if (_allEngineers.isEmpty)
+                      Text(
+                        'No site engineers registered yet.',
+                        style: AppTextStyles.caption,
+                      )
+                    else
+                      Wrap(
+                        spacing: AppSpacing.s,
+                        runSpacing: AppSpacing.s,
+                        children: _allEngineers.map((user) {
+                          final isSelected =
+                              _selectedEngineers.contains(user.uid);
+                          final name = user.name.isNotEmpty
+                              ? user.name
+                              : user.email;
+                          return FilterChip(
+                            label: Text(name),
+                            selected: isSelected,
+                            onSelected: (val) {
+                              setState(() {
+                                if (val) {
+                                  _selectedEngineers.add(user.uid);
+                                } else {
+                                  _selectedEngineers.remove(user.uid);
+                                }
+                              });
+                            },
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 2),
+                            selectedColor:
+                                AppColors.primary.withValues(alpha: 0.12),
+                            checkmarkColor: AppColors.primary,
+                            backgroundColor: AppColors.background,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.divider,
+                            ),
+                            labelStyle: TextStyle(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.onSurface,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              fontSize: 12,
+                            ),
+                          );
+                        }).toList(),
+                      ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xl),
 
-                    // Assign Purchase Team
-                    Text('Assign Purchase Team Members', style: AppTextStyles.label),
-                    const SizedBox(height: 8),
-                    _UserChipSelector(
-                      users: _allPurchase,
-                      selected: _selectedPurchase,
-                      emptyText: 'No purchase team members registered yet',
-                      accentColor: AppColors.success,
-                      onChanged: () => setState(() {}),
-                    ),
+                    // ── Assign Purchase Team ──────────────────────────
+                    Text('Assign Purchase Team',
+                        style: AppTextStyles.label
+                            .copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: AppSpacing.s),
+                    if (_allPurchase.isEmpty)
+                      Text(
+                        'No purchase team members registered yet.',
+                        style: AppTextStyles.caption,
+                      )
+                    else
+                      Wrap(
+                        spacing: AppSpacing.s,
+                        runSpacing: AppSpacing.s,
+                        children: _allPurchase.map((user) {
+                          final isSelected =
+                              _selectedPurchase.contains(user.uid);
+                          final name = user.name.isNotEmpty
+                              ? user.name
+                              : user.email;
+                          return FilterChip(
+                            label: Text(name),
+                            selected: isSelected,
+                            onSelected: (val) {
+                              setState(() {
+                                if (val) {
+                                  _selectedPurchase.add(user.uid);
+                                } else {
+                                  _selectedPurchase.remove(user.uid);
+                                }
+                              });
+                            },
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 4, vertical: 2),
+                            selectedColor:
+                                AppColors.success.withValues(alpha: 0.12),
+                            checkmarkColor: AppColors.success,
+                            backgroundColor: AppColors.background,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? AppColors.success
+                                  : AppColors.divider,
+                            ),
+                            labelStyle: TextStyle(
+                              color: isSelected
+                                  ? AppColors.success
+                                  : AppColors.onSurface,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                              fontSize: 12,
+                            ),
+                          );
+                        }).toList(),
+                      ),
 
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xxl),
 
-                    // Submit button
                     PrimaryButton(
                       label: 'Create Site',
                       icon: Icons.check_circle_outline,
                       isLoading: _isLoading,
                       onPressed: _submit,
                     ),
-
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
             ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Multi-select chip widget for users
-// ---------------------------------------------------------------------------
-class _UserChipSelector extends StatelessWidget {
-  final List<UserModel> users;
-  final Set<String> selected;
-  final String emptyText;
-  final Color accentColor;
-  final VoidCallback onChanged;
-
-  const _UserChipSelector({
-    required this.users,
-    required this.selected,
-    required this.emptyText,
-    required this.accentColor,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    if (users.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.divider),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.info_outline, size: 18, color: AppColors.onSurfaceMuted),
-            const SizedBox(width: 8),
-            Text(emptyText, style: AppTextStyles.caption),
-          ],
-        ),
-      );
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Wrap(
-        spacing: 8,
-        runSpacing: 8,
-        children: users.map((user) {
-          final isSelected = selected.contains(user.uid);
-          return FilterChip(
-            label: Text(user.name.isNotEmpty ? user.name : user.email),
-            selected: isSelected,
-            onSelected: (val) {
-              if (val) {
-                selected.add(user.uid);
-              } else {
-                selected.remove(user.uid);
-              }
-              onChanged();
-            },
-            selectedColor: accentColor.withValues(alpha: 0.2),
-            checkmarkColor: accentColor,
-            backgroundColor: AppColors.background,
-            side: BorderSide(
-              color: isSelected ? accentColor : AppColors.divider,
-            ),
-            labelStyle: TextStyle(
-              color: isSelected ? accentColor : AppColors.onSurface,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              fontSize: 13,
-            ),
-          );
-        }).toList(),
-      ),
     );
   }
 }

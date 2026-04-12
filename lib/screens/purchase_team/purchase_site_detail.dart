@@ -29,11 +29,13 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
+<<<<<<< Updated upstream
                   gradient: const LinearGradient(
                     colors: [AppColors.success, Color(0xFF66BB6A)],
                     begin: Alignment.topLeft,
@@ -42,9 +44,15 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(Icons.location_city, color: Colors.white, size: 18),
+=======
+                  color: AppColors.onPrimary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+                ),
+                child: const Icon(Icons.location_on_outlined, color: AppColors.onPrimary, size: 18),
+>>>>>>> Stashed changes
               ),
-              const SizedBox(width: 10),
-              Expanded(
+              const SizedBox(width: AppSpacing.s),
+              Flexible(
                 child: Text(
                   siteName,
                   style: AppTextStyles.h3.copyWith(color: AppColors.onSurface),
@@ -53,17 +61,27 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
               ),
             ],
           ),
+          centerTitle: true,
           bottom: TabBar(
             labelColor: AppColors.success,
             unselectedLabelColor: AppColors.onSurfaceMuted,
             indicatorColor: AppColors.success,
             indicatorWeight: 3,
+<<<<<<< Updated upstream
             labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 13),
+=======
+            labelStyle: AppTextStyles.label.copyWith(color: AppColors.onPrimary, fontWeight: FontWeight.bold),
+            unselectedLabelStyle: AppTextStyles.caption.copyWith(
+              color: AppColors.onPrimary.withValues(alpha: 0.6),
+            ),
+            indicatorSize: TabBarIndicatorSize.tab,
+            dividerColor: Colors.transparent,
+>>>>>>> Stashed changes
             tabs: const [
-              Tab(icon: Icon(Icons.assignment_outlined, size: 20), text: 'Requirements'),
-              Tab(icon: Icon(Icons.campaign_outlined, size: 20), text: 'Announcements'),
-              Tab(icon: Icon(Icons.how_to_reg_outlined, size: 20), text: 'Attendance'),
+              Tab(text: 'Requirements'),
+              Tab(text: 'Announcements'),
+              Tab(text: 'Attendance'),
             ],
           ),
         ),

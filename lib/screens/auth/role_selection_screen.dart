@@ -10,18 +10,22 @@ class RoleSelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Column(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding,
+              vertical: AppSpacing.xxl,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
                   children: [
-                    Image.asset('assets/images/logo.jpg', width: 180),
-                    const SizedBox(height: 8),
+                    Image.asset('assets/images/logo.jpg', width: 160),
+                    const SizedBox(height: AppSpacing.m),
                     Text('Select Your Role', style: AppTextStyles.h2),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.s),
                     Text(
                       'Choose how you want to sign in',
                       style: AppTextStyles.body.copyWith(color: AppColors.onSurfaceMuted),
@@ -29,61 +33,71 @@ class RoleSelectionScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 26),
-              Column(
-                children: [
-                  _RoleCard(
-                    icon: Icons.manage_accounts,
-                    title: 'Owner',
-                    subtitle: 'Approve quotations & view all sites',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen(role: kRoleOwner)),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  _RoleCard(
-                    icon: Icons.business_center,
-                    title: 'Manager',
-                    subtitle: 'Manage sites, team & announcements',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen(role: kRoleManager)),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  _RoleCard(
-                    icon: Icons.engineering,
-                    title: 'Site Engineer',
-                    subtitle: 'Mark attendance & submit requirements',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen(role: kRoleSiteEngineer)),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  _RoleCard(
-                    icon: Icons.receipt_long,
-                    title: 'Purchase Team',
-                    subtitle: 'Upload quotations & manage orders',
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen(role: kRolePurchaseTeam)),
-                      );
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-            ],
+                const SizedBox(height: AppSpacing.xxl),
+                Column(
+                  children: [
+                    _RoleCard(
+                      icon: Icons.manage_accounts,
+                      title: 'Owner',
+                      subtitle: 'Approve quotations & view all sites',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(role: kRoleOwner),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.m),
+                    _RoleCard(
+                      icon: Icons.business_center,
+                      title: 'Manager',
+                      subtitle: 'Manage sites, team & announcements',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(role: kRoleManager),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.m),
+                    _RoleCard(
+                      icon: Icons.engineering,
+                      title: 'Site Engineer',
+                      subtitle: 'Mark attendance & submit requirements',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const LoginScreen(role: kRoleSiteEngineer),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.m),
+                    _RoleCard(
+                      icon: Icons.receipt_long,
+                      title: 'Purchase Team',
+                      subtitle: 'Upload quotations & manage orders',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const LoginScreen(role: kRolePurchaseTeam),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.m),
+              ],
+            ),
           ),
         ),
       ),
