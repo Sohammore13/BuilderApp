@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
+import '../../widgets/common_widgets.dart';
 
 class ManagerMaterialRequestsTab extends StatefulWidget {
   final String siteId;
@@ -64,15 +65,6 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
   void _viewImage(String url) => _viewFile(url);
 
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending_quotation': return Colors.blue;
-      case 'pending_approval': return Colors.orange;
-      case 'approved': return AppColors.success;
-      case 'rejected': return AppColors.error;
-      default: return AppColors.onSurfaceMuted;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,17 +106,7 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
             final engineerName = data['uploadedByName'] ?? 'Unknown Engineer';
             final status = data['status'] as String? ?? 'pending_quotation';
             final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-            final statusColor = _getStatusColor(status);
 
-<<<<<<< Updated upstream
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              color: AppColors.card,
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: AppColors.divider),
-=======
             return Container(
               margin: const EdgeInsets.only(bottom: AppSpacing.m),
               decoration: BoxDecoration(
@@ -138,7 +120,6 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                     offset: const Offset(0, 4),
                   ),
                 ],
->>>>>>> Stashed changes
               ),
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -149,10 +130,6 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                       GestureDetector(
                         onTap: () => _viewImage(imageUrl),
                         child: ClipRRect(
-<<<<<<< Updated upstream
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(imageUrl, width: 80, height: 80, fit: BoxFit.cover),
-=======
                           borderRadius:
                               BorderRadius.circular(AppSpacing.borderRadius),
                           child: Container(
@@ -190,16 +167,10 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                               ),
                             ),
                           ),
->>>>>>> Stashed changes
                         ),
                       )
                     else 
                       Container(
-<<<<<<< Updated upstream
-                        width: 80, height: 80, 
-                        decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(8)),
-                        child: const Icon(Icons.image_not_supported, color: AppColors.onSurfaceMuted),
-=======
                         width: 80,
                         height: 80,
                         decoration: BoxDecoration(
@@ -215,7 +186,6 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                           color: AppColors.onSurfaceMuted,
                           size: 24,
                         ),
->>>>>>> Stashed changes
                       ),
                     const SizedBox(width: AppSpacing.m),
                     Expanded(
@@ -226,19 +196,6 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                               style: AppTextStyles.body
                                   .copyWith(fontWeight: FontWeight.bold)),
                           if (createdAt != null)
-<<<<<<< Updated upstream
-                            Text(DateFormat('MMM dd, yyyy').format(createdAt), style: AppTextStyles.caption),
-                          const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: statusColor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(8)),
-                            child: Text(status.replaceAll('_', ' ').toUpperCase(), 
-                              style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold)),
-                          ),
-                          if (data['quotationNote'] != null && (data['quotationNote'] as String).isNotEmpty) ...[
-                            const SizedBox(height: 8),
-                            Text('Note: ${data['quotationNote']}', style: AppTextStyles.caption.copyWith(fontStyle: FontStyle.italic)),
-=======
                             Padding(
                               padding: const EdgeInsets.only(top: 2),
                               child: Text(
@@ -249,28 +206,9 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                               ),
                             ),
                           const SizedBox(height: AppSpacing.s),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(status)
-                                  .withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                  color: _getStatusColor(status)
-                                      .withValues(alpha: 0.2)),
-                            ),
-                            child: Text(
-                              status.replaceAll('_', ' ').toUpperCase(),
-                              style: TextStyle(
-                                color: _getStatusColor(status),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
+                          AppStatusBadge(
+                            label: status.replaceAll('_', ' ').toUpperCase(),
+                            tone: requestStatusTone(status),
                           ),
                           if (data['quotationNote'] != null &&
                               (data['quotationNote'] as String)
@@ -295,7 +233,6 @@ class _ManagerMaterialRequestsTabState extends State<ManagerMaterialRequestsTab>
                                 ),
                               ),
                             ),
->>>>>>> Stashed changes
                           ],
                           if (pdfUrl != null) ...[
                             const SizedBox(height: AppSpacing.s),

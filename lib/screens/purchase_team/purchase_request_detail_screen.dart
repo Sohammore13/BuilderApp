@@ -204,37 +204,22 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
               icon: const Icon(Icons.arrow_back_ios, size: 20),
               onPressed: () => Navigator.of(context).pop(),
             ),
-<<<<<<< Updated upstream
             title: const Text('Quotation Preview', style: TextStyle(color: Colors.white, fontSize: 16)),
           ),
           body: Center(
             child: InteractiveViewer(
               child: Image.network(
                 url,
-                errorBuilder: (context, error, stackTrace) => const Column(
+                errorBuilder: (context, error, stackTrace) => Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, color: Colors.white, size: 40),
-                    SizedBox(height: 12),
-                    Text('Failed to load quotation image', style: TextStyle(color: Colors.white)),
+                    const Icon(Icons.error_outline, color: Colors.white, size: 40),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Failed to load quotation image',
+                      style: AppTextStyles.body.copyWith(color: Colors.white),
+                    ),
                   ],
-=======
-            body: Center(
-              child: InteractiveViewer(
-                child: Image.network(
-                  url,
-                  errorBuilder: (context, error, stackTrace) => Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.white, size: 40),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Failed to load quotation image',
-                        style: AppTextStyles.body.copyWith(color: Colors.white),
-                      ),
-                    ],
-                  ),
->>>>>>> Stashed changes
                 ),
               ),
             ),
@@ -244,19 +229,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
     }
   }
 
-<<<<<<< Updated upstream
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'pending_quotation': return Colors.blue;
-      case 'pending_approval': return AppColors.warning;
-      case 'approved': return AppColors.success;
-      case 'rejected': return AppColors.error;
-      default: return AppColors.onSurfaceMuted;
-    }
-  }
-=======
-
->>>>>>> Stashed changes
 
   String _formatStatus(String status) {
     return status.replaceAll('_', ' ').toUpperCase();
@@ -264,23 +236,19 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(_status);
+    final statusTone = requestStatusTone(_status);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.onSurface,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
-<<<<<<< Updated upstream
-        title: const Text('Requirement Details', style: TextStyle(fontSize: 18)),
-=======
         title: Text('Material Requirement', style: AppTextStyles.appBarTitle),
-        centerTitle: true,
->>>>>>> Stashed changes
         actions: [
           if (_canDeleteRequest)
             IconButton(
@@ -302,10 +270,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                   width: double.infinity,
                   child: InteractiveViewer(
                     child: _imageUrl.isNotEmpty
-<<<<<<< Updated upstream
-                      ? Image.network(_imageUrl, fit: BoxFit.contain)
-                      : const Center(child: Icon(Icons.image_not_supported, color: Colors.white, size: 50)),
-=======
                         ? Image.network(_imageUrl, fit: BoxFit.contain)
                         : const Center(
                             child: Icon(
@@ -314,7 +278,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                               size: 50,
                             ),
                           ),
->>>>>>> Stashed changes
                   ),
                 ),
               ),
@@ -340,30 +303,12 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-<<<<<<< Updated upstream
-                          Text('Status:', style: AppTextStyles.h4),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: statusColor.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              _formatStatus(_status),
-                              style: TextStyle(
-                                color: statusColor,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-=======
                           Text('Current Status',
                               style: AppTextStyles.body
                                   .copyWith(fontWeight: FontWeight.bold)),
                           AppStatusBadge(
                             label: _formatStatus(_status),
                             tone: statusTone,
->>>>>>> Stashed changes
                           ),
                         ],
                       ),
@@ -378,9 +323,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                                 .copyWith(color: AppColors.onSurfaceMuted),
                             filled: true,
                             fillColor: AppColors.background,
-<<<<<<< Updated upstream
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-=======
                             contentPadding: const EdgeInsets.all(AppSpacing.m),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(
@@ -397,23 +339,16 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                                   AppSpacing.borderRadius),
                               borderSide: BorderSide(color: AppColors.primary),
                             ),
->>>>>>> Stashed changes
                           ),
                           maxLines: 2,
                         ),
                         const SizedBox(height: AppSpacing.m),
                         SecondaryButton(
                           onPressed: _pickFile,
-<<<<<<< Updated upstream
-                          icon: Icons.upload_file,
-                          label: 'Attach Quotation (Imge or PDF)',
-                          color: AppColors.primaryLight,
-=======
                           icon: Icons.attach_file_rounded,
                           label: 'Attach Quotation (Ref. Image/PDF)',
                           color: AppColors.primary,
                           height: 44,
->>>>>>> Stashed changes
                         ),
                         if (_selectedFilename != null) ...[
                           const SizedBox(height: AppSpacing.s),
@@ -431,18 +366,12 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                             child: Row(
                               children: [
                                 Icon(
-<<<<<<< Updated upstream
-                                  (_selectedFilename?.toLowerCase().endsWith('.pdf') ?? false)
-                                      ? Icons.picture_as_pdf_outlined
-                                      : Icons.image_outlined,
-=======
                                   (_selectedFilename?.toLowerCase().endsWith(
                                             '.pdf',
                                           ) ??
                                           false)
                                       ? Icons.picture_as_pdf_rounded
                                       : Icons.image_rounded,
->>>>>>> Stashed changes
                                   color: AppColors.primary,
                                   size: 18,
                                 ),
@@ -450,21 +379,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                                 Expanded(
                                   child: Text(
                                     _selectedFilename!,
-<<<<<<< Updated upstream
-                                    style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: _pickFile,
-                                  style: TextButton.styleFrom(foregroundColor: AppColors.primary),
-                                  child: const Text('Change'),
-                                ),
-                                IconButton(
-                                  tooltip: 'Remove',
-                                  onPressed: _clearSelectedAttachment,
-                                  icon: const Icon(Icons.delete_outline, color: AppColors.error),
-=======
                                     style: AppTextStyles.caption.copyWith(
                                         fontWeight: FontWeight.bold,
                                         color: AppColors.primary),
@@ -478,7 +392,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                                       color: AppColors.error, size: 18),
                                   padding: EdgeInsets.zero,
                                   constraints: const BoxConstraints(),
->>>>>>> Stashed changes
                                 ),
                               ],
                             ),
@@ -493,10 +406,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                           ),
                         ]
                       ] else ...[
-<<<<<<< Updated upstream
-                        if (_existingNote != null && _existingNote!.isNotEmpty) ...[
-                          Text('Remark:', style: AppTextStyles.label),
-=======
                         if (_existingNote != null &&
                             _existingNote!.isNotEmpty) ...[
                           Text('PURCHASE REMARK',
@@ -504,7 +413,6 @@ class _PurchaseRequestDetailScreenState extends State<PurchaseRequestDetailScree
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.onSurfaceMuted)),
                           const SizedBox(height: 4),
->>>>>>> Stashed changes
                           Text(_existingNote!, style: AppTextStyles.body),
                           const SizedBox(height: AppSpacing.l),
                         ],

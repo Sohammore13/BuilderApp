@@ -101,32 +101,31 @@ class _EngineerBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.screenPadding),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.primary.withValues(alpha: 0.1), AppColors.primary.withValues(alpha: 0.02)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        border: Border.all(color: AppColors.divider, width: 1.2),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.cardPadding - 4),
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: AppColors.info.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
             ),
-            child: const Icon(Icons.engineering_outlined, color: AppColors.primary, size: 26),
+            child: const Icon(Icons.engineering_outlined,
+                color: AppColors.info, size: 24),
           ),
           const SizedBox(width: AppSpacing.m),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Site Engineer', style: AppTextStyles.h3.copyWith(color: AppColors.primary)),
+                Text('Site Engineer',
+                    style: AppTextStyles.h3.copyWith(color: AppColors.onSurface)),
                 const SizedBox(height: 2),
-                Text('Manage your assigned construction sites', style: AppTextStyles.caption),
+                Text('Manage your assigned construction sites',
+                    style: AppTextStyles.caption),
               ],
             ),
           ),
@@ -179,7 +178,8 @@ class _SiteCard extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                 ),
-                child: const Icon(Icons.location_city, color: AppColors.primary, size: 22),
+                child: const Icon(Icons.location_city,
+                    color: AppColors.primary, size: 22),
               ),
               const SizedBox(width: AppSpacing.m),
               Expanded(
@@ -187,16 +187,26 @@ class _SiteCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(site.siteName,
-                        style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
+                        style: AppTextStyles.body
+                            .copyWith(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onSurfaceMuted),
+                        const Icon(Icons.location_on_outlined,
+                            size: 14, color: AppColors.onSurfaceMuted),
                         const SizedBox(width: AppSpacing.xs),
                         Expanded(
-                          child: Text(site.location, style: AppTextStyles.caption, overflow: TextOverflow.ellipsis),
+                          child: Text(site.location,
+                              style: AppTextStyles.caption,
+                              overflow: TextOverflow.ellipsis),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Assigned Engineer',
+                      style: AppTextStyles.caption
+                          .copyWith(color: AppColors.primary),
                     ),
                   ],
                 ),

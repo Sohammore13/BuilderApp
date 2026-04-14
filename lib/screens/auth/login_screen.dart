@@ -151,35 +151,26 @@ class _LoginScreenState extends State<LoginScreen> {
                         IconButton(
                           padding: EdgeInsets.zero,
                           alignment: Alignment.centerLeft,
-                          icon: const Icon(Icons.arrow_back_ios, color: AppColors.onSurface, size: 20),
+                          icon: const Icon(Icons.arrow_back_ios,
+                              color: AppColors.onSurface, size: 20),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const Spacer(),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 6),
                           decoration: BoxDecoration(
-<<<<<<< Updated upstream
-                            color: AppColors.primaryTint,
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.18)),
-                          ),
-                          child: Text(
-                            _roleLabel,
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.bold,
-=======
-                            color: roleChipTone.background,
+                            color: roleTone(widget.role).background,
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: roleChipTone.border()),
+                            border:
+                                Border.all(color: roleTone(widget.role).border()),
                           ),
                           child: Text(
                             _roleLabel.toUpperCase(),
                             style: AppTextStyles.label.copyWith(
-                              color: roleChipTone.foreground,
+                              color: roleTone(widget.role).foreground,
                               letterSpacing: 0.5,
                               fontSize: 10,
->>>>>>> Stashed changes
                             ),
                           ),
                         ),
@@ -201,15 +192,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(height: AppSpacing.s),
                           Text(
                             'Construction Management Platform',
-<<<<<<< Updated upstream
-                            style: AppTextStyles.caption.copyWith(fontSize: 13),
-=======
                             style: AppTextStyles.body.copyWith(
                               fontSize: 13,
-                              color: AppColors.onSurfaceSecondary,
+                              color: AppColors.onSurfaceMuted,
                               letterSpacing: 0.2,
                             ),
->>>>>>> Stashed changes
                           ),
                         ],
                       ),
@@ -321,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             const Divider(color: AppColors.divider),
                             const SizedBox(height: 16),
                             Text(
-                              "New to BuilderPro?",
+                              "New to SSS developers?",
                               style: AppTextStyles.caption,
                             ),
                             const SizedBox(height: 8),

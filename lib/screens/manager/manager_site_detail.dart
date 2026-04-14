@@ -22,13 +22,10 @@ class ManagerSiteDetailScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-<<<<<<< Updated upstream
           backgroundColor: AppColors.surface,
           foregroundColor: AppColors.onSurface,
           elevation: 0,
-=======
           centerTitle: true,
->>>>>>> Stashed changes
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, size: 20),
             onPressed: () => Navigator.of(context).pop(),
@@ -40,17 +37,12 @@ class ManagerSiteDetailScreen extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-<<<<<<< Updated upstream
                   gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.primaryLight],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(8),
-=======
-                  color: AppColors.onPrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
->>>>>>> Stashed changes
                 ),
                 child: const Icon(Icons.location_city, color: Colors.white, size: 18),
               ),
@@ -83,19 +75,14 @@ class ManagerSiteDetailScreen extends StatelessWidget {
             ),
           ],
           bottom: TabBar(
-<<<<<<< Updated upstream
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.onSurfaceMuted,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 13),
-=======
-            labelColor: AppColors.onPrimary,
-            unselectedLabelColor: AppColors.onPrimary.withValues(alpha: 0.7),
+            labelStyle: AppTextStyles.label.copyWith(fontWeight: FontWeight.bold),
+            unselectedLabelStyle: AppTextStyles.caption.copyWith(
+              color: AppColors.onSurfaceMuted,
+            ),
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
->>>>>>> Stashed changes
             tabs: const [
               Tab(text: 'Attendance'),
               Tab(text: 'Announcements'),

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../constants.dart';
 import '../../services/firestore_service.dart';
 import 'purchase_request_detail_screen.dart';
+import '../../widgets/common_widgets.dart';
 
 class PurchaseOrdersTab extends StatefulWidget {
   final String siteId;
@@ -74,10 +75,6 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
             padding: const EdgeInsets.all(AppSpacing.screenPadding),
             children: [
               if (pendingAction.isNotEmpty) ...[
-<<<<<<< Updated upstream
-                Text('PENDING YOUR ACTION', style: AppTextStyles.label.copyWith(color: AppColors.primary)),
-                const SizedBox(height: 12),
-=======
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: Text(
@@ -87,17 +84,11 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.m),
->>>>>>> Stashed changes
                 ...pendingAction.map((doc) => _buildRequestCard(doc)),
                 const SizedBox(height: AppSpacing.xxl),
               ],
 
               if (history.isNotEmpty) ...[
-<<<<<<< Updated upstream
-                Text('HISTORY', style: AppTextStyles.label),
-                const SizedBox(height: 12),
-                ...history.map((doc) => _buildRequestCard(doc, isHistory: true)),
-=======
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
                   child: Text('HISTORY',
@@ -109,7 +100,6 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
                 ...history.map(
                   (doc) => _buildRequestCard(doc, isHistory: true),
                 ),
->>>>>>> Stashed changes
               ],
             ],
           );
@@ -159,16 +149,6 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
             children: [
               if (imageUrl != null)
                 ClipRRect(
-<<<<<<< Updated upstream
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
-                )
-              else 
-                const Icon(Icons.image_not_supported, size: 40),
-              
-              const SizedBox(width: 12),
-              
-=======
                   borderRadius:
                       BorderRadius.circular(AppSpacing.borderRadiusSm),
                   child: Image.network(
@@ -191,7 +171,6 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
                       color: AppColors.onSurfaceMuted, size: 20),
                 ),
               const SizedBox(width: AppSpacing.m),
->>>>>>> Stashed changes
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -201,16 +180,11 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
                             fontWeight: FontWeight.bold)),
                     const SizedBox(height: 2),
                     if (createdAt != null)
-<<<<<<< Updated upstream
-                      Text('Submitted: ${DateFormat('MMM dd, hh:mm a').format(createdAt)}', 
-                        style: AppTextStyles.caption),
-=======
                       Text(
                         DateFormat('MMM dd, hh:mm a').format(createdAt),
                         style: AppTextStyles.caption
                             .copyWith(color: AppColors.onSurfaceMuted),
                       ),
->>>>>>> Stashed changes
                   ],
                 ),
               ),
@@ -224,53 +198,9 @@ class _PurchaseOrdersTabState extends State<PurchaseOrdersTab> {
   }
 
   Widget _statusBadge(String status) {
-    Color color;
-    switch (status) {
-      case 'pending_quotation': color = Colors.blue; break;
-      case 'pending_approval': color = Colors.orange; break;
-      case 'approved': color = AppColors.success; break;
-      case 'rejected': color = AppColors.error; break;
-      default: color = AppColors.onSurfaceMuted;
-    }
-    return Container(
-<<<<<<< Updated upstream
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(6)),
-      child: Text(status.replaceAll('_', ' ').toUpperCase(), 
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+    return AppStatusBadge(
+      label: status.replaceAll('_', ' ').toUpperCase(),
+      tone: requestStatusTone(status),
     );
   }
-=======
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: _getStatusColor(status).withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border:
-            Border.all(color: _getStatusColor(status).withValues(alpha: 0.2)),
-      ),
-      child: Text(
-        status.replaceAll('_', ' ').toUpperCase(),
-        style: TextStyle(
-          color: _getStatusColor(status),
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'approved':
-        return AppColors.success;
-      case 'rejected':
-        return AppColors.error;
-      case 'pending_quotation':
-        return AppColors.warning;
-      default:
-        return AppColors.onSurfaceMuted;
-    }
-  }
->>>>>>> Stashed changes
 }

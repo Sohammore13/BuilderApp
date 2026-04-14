@@ -4,7 +4,6 @@ import '../../constants.dart';
 import '../../widgets/common_widgets.dart';
 import '../../services/firestore_service.dart';
 import '../../models/site_model.dart';
-import '../../services/auth_service.dart';
 import 'owner_site_detail.dart';
 import 'owner_purchase_orders_tab.dart';
 
@@ -23,7 +22,7 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final firestoreService = FirestoreService();
 
-    final _pages = [
+    final pages = [
       // Tab 1: Purchase Approvals (Global)
       const OwnerPurchaseOrdersTab(), // No siteId needed, it's global now
       // Tab 2: View Sites (Read Only)
@@ -32,16 +31,8 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Owner Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async => await AuthService().signOut(),
-          ),
-        ],
-      ),
-      body: _pages[_currentIndex],
+      appBar: const BuilderAppBar(title: 'Owner Dashboard'),
+      body: pages[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) => setState(() => _currentIndex = index),
@@ -78,45 +69,23 @@ class _ViewSitesTab extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(AppSpacing.screenPadding),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.warning.withValues(alpha: 0.1), AppColors.warning.withValues(alpha: 0.02)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-<<<<<<< Updated upstream
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.warning.withValues(alpha: 0.15)),
-=======
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-              border: Border.all(
-                color: AppColors.warning.withValues(alpha: 0.15),
-              ),
->>>>>>> Stashed changes
+              border: Border.all(color: AppColors.divider, width: 1.2),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.cardPadding - 4),
                   decoration: BoxDecoration(
-                    color: AppColors.warning.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+                    color: AppColors.warning.withValues(alpha: 0.08),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.borderRadius),
                   ),
-<<<<<<< Updated upstream
-                  child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.warning, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Owner View', style: AppTextStyles.h3.copyWith(color: AppColors.warning)),
-                    const SizedBox(height: 2),
-                    Text('Read-only access to all sites', style: AppTextStyles.caption),
-                  ],
-=======
                   child: const Icon(
                     Icons.admin_panel_settings_outlined,
                     color: AppColors.warning,
-                    size: 26,
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.m),
@@ -127,7 +96,7 @@ class _ViewSitesTab extends StatelessWidget {
                       Text(
                         'Owner View',
                         style: AppTextStyles.h3.copyWith(
-                          color: AppColors.warning,
+                          color: AppColors.onSurface,
                         ),
                       ),
                       const SizedBox(height: 2),
@@ -137,7 +106,6 @@ class _ViewSitesTab extends StatelessWidget {
                       ),
                     ],
                   ),
->>>>>>> Stashed changes
                 ),
               ],
             ),
@@ -232,15 +200,11 @@ class _SiteCard extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                 ),
-<<<<<<< Updated upstream
-                child: const Icon(Icons.location_city, color: AppColors.primary, size: 24),
-=======
                 child: const Icon(
                   Icons.location_city,
                   color: AppColors.primary,
                   size: 22,
                 ),
->>>>>>> Stashed changes
               ),
               const SizedBox(width: AppSpacing.m),
               Expanded(
@@ -254,25 +218,6 @@ class _SiteCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-<<<<<<< Updated upstream
-                        const Icon(Icons.location_on_outlined, size: 14, color: AppColors.onSurfaceMuted),
-                        const SizedBox(width: 4),
-                        Expanded(child: Text(site.location, style: AppTextStyles.caption, overflow: TextOverflow.ellipsis)),
-                      ],
-                    ),
-                    const SizedBox(height: 3),
-                    Row(
-                      children: [
-                        const Icon(Icons.people_outline, size: 14, color: AppColors.onSurfaceMuted),
-                        const SizedBox(width: 4),
-                        Text('${site.assignedEngineers.length} engineers · ${site.assignedPurchaseTeam.length} purchase', style: AppTextStyles.caption),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.onSurfaceMuted),
-=======
                         const Icon(
                           Icons.location_on_outlined,
                           size: 14,
@@ -288,6 +233,14 @@ class _SiteCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        const Icon(Icons.people_outline, size: 14, color: AppColors.onSurfaceMuted),
+                        const SizedBox(width: 4),
+                        Text('${site.assignedEngineers.length} engineers · ${site.assignedPurchaseTeam.length} purchase', style: AppTextStyles.caption),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -296,7 +249,6 @@ class _SiteCard extends StatelessWidget {
                 size: 14,
                 color: AppColors.onSurfaceMuted.withValues(alpha: 0.7),
               ),
->>>>>>> Stashed changes
             ],
           ),
         ),

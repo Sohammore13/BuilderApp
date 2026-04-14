@@ -19,10 +19,6 @@ class _ManagerAttendanceTabState extends State<ManagerAttendanceTab> {
   List<String> _purchaseUids = [];
   final Map<String, UserModel> _userCache = {};
 
-  // date → list of present engineer UIDs
-  Map<String, List<String>> _engineerAttendance = {};
-  // date → list of present purchase UIDs
-  Map<String, List<String>> _purchaseAttendance = {};
 
   @override
   void initState() {

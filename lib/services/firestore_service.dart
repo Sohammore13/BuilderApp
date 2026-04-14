@@ -87,9 +87,21 @@ class FirestoreService {
     return docRef.id;
   }
 
-  /// Stream ALL sites (owner can see every site regardless of who created it)
   Stream<List<SiteModel>> streamSitesForOwner(String ownerUid) {
     return _db.collection('sites').snapshots().map((snap) {
+      final list = snap.docs.map((d) => SiteModel.fromDocument(d)).toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    });
+  }
+
+  /// Stream sites created by a specific manager
+  Stream<List<SiteModel>> streamSitesForManager(String managerUid) {
+    return _db
+        .collection('sites')
+        .where('createdBy', isEqualTo: managerUid)
+        .snapshots()
+        .map((snap) {
       final list = snap.docs.map((d) => SiteModel.fromDocument(d)).toList();
       list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return list;

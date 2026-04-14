@@ -167,21 +167,15 @@ class _ManagerEditMembersScreenState extends State<ManagerEditMembersScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-<<<<<<< Updated upstream
-            Text('Edit Members', style: AppTextStyles.h3.copyWith(color: AppColors.onSurface)),
-            Text(widget.siteName,
-                style: AppTextStyles.caption, overflow: TextOverflow.ellipsis),
-=======
             Text('Edit Members', style: AppTextStyles.appBarTitle),
             Text(
               widget.siteName,
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.onPrimary.withValues(alpha: 0.8),
+                color: AppColors.onSurfaceMuted,
                 fontSize: 11,
               ),
               overflow: TextOverflow.ellipsis,
             ),
->>>>>>> Stashed changes
           ],
         ),
         centerTitle: false,

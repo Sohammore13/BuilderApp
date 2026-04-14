@@ -35,21 +35,14 @@ class EngineerSiteDetailScreen extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-<<<<<<< Updated upstream
                   gradient: const LinearGradient(
                     colors: [AppColors.primary, AppColors.primaryLight],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.location_city, color: Colors.white, size: 18),
-=======
-                  color: AppColors.onPrimary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
                 ),
-                child: const Icon(Icons.location_on_outlined, color: AppColors.onPrimary, size: 18),
->>>>>>> Stashed changes
+                child: const Icon(Icons.location_city, color: Colors.white, size: 18),
               ),
               const SizedBox(width: AppSpacing.s),
               Flexible(
@@ -67,19 +60,12 @@ class EngineerSiteDetailScreen extends StatelessWidget {
             unselectedLabelColor: AppColors.onSurfaceMuted,
             indicatorColor: AppColors.primary,
             indicatorWeight: 3,
-<<<<<<< Updated upstream
-            labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w400, fontSize: 13),
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-=======
-            labelStyle: AppTextStyles.label.copyWith(color: AppColors.onPrimary, fontWeight: FontWeight.bold),
+            labelStyle: AppTextStyles.label.copyWith(fontWeight: FontWeight.bold),
             unselectedLabelStyle: AppTextStyles.caption.copyWith(
-              color: AppColors.onPrimary.withValues(alpha: 0.6),
+              color: AppColors.onSurfaceMuted,
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             dividerColor: Colors.transparent,
->>>>>>> Stashed changes
             tabs: const [
               Tab(text: 'Attendance'),
               Tab(text: 'Announcements'),

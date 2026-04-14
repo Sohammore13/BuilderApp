@@ -67,15 +67,11 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
   }
 
   Future<void> _submitRequest() async {
-<<<<<<< Updated upstream
-    if (_selectedImageBytes == null || _currentUid == null || _currentUserName == null) return;
-=======
     if (_selectedImageBytes == null ||
         _currentUid == null ||
         _currentUserName == null) {
       return;
     }
->>>>>>> Stashed changes
 
     setState(() => _isUploading = true);
 
@@ -217,13 +213,6 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                     )
                   else ...[
                     // Preview
-<<<<<<< Updated upstream
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.memory(_selectedImageBytes!, height: 200, width: double.infinity, fit: BoxFit.cover),
-=======
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
@@ -242,7 +231,6 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                           height: 180,
                           width: double.infinity,
                           fit: BoxFit.cover,
->>>>>>> Stashed changes
                         ),
                       ),
                     ),
@@ -266,17 +254,12 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                             onPressed: _clearSelectedImage,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.error,
-<<<<<<< Updated upstream
-                              side: BorderSide(color: AppColors.error.withValues(alpha: 0.6)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-=======
                               side: BorderSide(
                                 color: AppColors.error.withValues(alpha: 0.3),
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                               ),
->>>>>>> Stashed changes
                               padding: EdgeInsets.zero,
                             ),
                             child: const Icon(Icons.delete_outline_rounded, size: 20),
@@ -286,16 +269,12 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                     ),
                     const SizedBox(height: AppSpacing.m),
                     if (_isUploading)
-<<<<<<< Updated upstream
-                      const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation(AppColors.primary)))
-=======
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.all(8.0),
                           child: CircularProgressIndicator(strokeWidth: 3),
                         ),
                       )
->>>>>>> Stashed changes
                     else
                       PrimaryButton(
                         onPressed: _submitRequest,
@@ -361,11 +340,7 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                           ],
                         ),
                         child: InkWell(
-<<<<<<< Updated upstream
-                          borderRadius: BorderRadius.circular(12),
-=======
                           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
->>>>>>> Stashed changes
                           onTap: imageUrl != null ? () => _viewFullScreenImage(imageUrl) : null,
                           child: Padding(
                             padding: const EdgeInsets.all(AppSpacing.cardPadding),
@@ -373,14 +348,6 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                               children: [
                                 if (imageUrl != null)
                                   ClipRRect(
-<<<<<<< Updated upstream
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.network(imageUrl, width: 60, height: 60, fit: BoxFit.cover),
-                                  )
-                                else 
-                                  const Icon(Icons.image_not_supported),
-                                const SizedBox(width: 12),
-=======
                                     borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
                                     child: Image.network(
                                       imageUrl,
@@ -400,18 +367,10 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                                     child: const Icon(Icons.image_not_supported_outlined, color: AppColors.onSurfaceMuted, size: 20),
                                   ),
                                 const SizedBox(width: AppSpacing.m),
->>>>>>> Stashed changes
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-<<<<<<< Updated upstream
-                                      Text('Request #${doc.id.substring(0, 6).toUpperCase()}', style: AppTextStyles.h4),
-                                      if (createdAt != null)
-                                        Text(DateFormat('MMM dd, hh:mm a').format(createdAt), style: AppTextStyles.caption),
-                                      if (status == 'rejected' && rejectionReason != null)
-                                        Text('Rejected: $rejectionReason', style: AppTextStyles.caption.copyWith(color: AppColors.error)),
-=======
                                       Text(
                                         'Request #${doc.id.substring(0, 6).toUpperCase()}',
                                         style: AppTextStyles.body.copyWith(fontWeight: FontWeight.bold),
@@ -431,7 +390,6 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
->>>>>>> Stashed changes
                                     ],
                                   ),
                                 ),
@@ -439,11 +397,7 @@ class _EngineerMaterialRequestsTabState extends State<EngineerMaterialRequestsTa
                                 if (canDelete)
                                   IconButton(
                                     tooltip: 'Delete',
-<<<<<<< Updated upstream
-                                    icon: const Icon(Icons.delete_outline, color: AppColors.error),
-=======
                                     icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 20),
->>>>>>> Stashed changes
                                     onPressed: () => _deleteRequest(doc.id),
                                     padding: EdgeInsets.zero,
                                     constraints: const BoxConstraints(),

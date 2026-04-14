@@ -101,32 +101,31 @@ class _PurchaseBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.screenPadding),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.success.withValues(alpha: 0.1), AppColors.success.withValues(alpha: 0.02)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-        border: Border.all(color: AppColors.success.withValues(alpha: 0.15)),
+        border: Border.all(color: AppColors.divider, width: 1.2),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(AppSpacing.cardPadding - 4),
             decoration: BoxDecoration(
-              color: AppColors.success.withValues(alpha: 0.15),
+              color: AppColors.success.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
             ),
-            child: const Icon(Icons.shopping_cart_outlined, color: AppColors.success, size: 26),
+            child: const Icon(Icons.shopping_cart_outlined,
+                color: AppColors.success, size: 24),
           ),
           const SizedBox(width: AppSpacing.m),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Purchase Team', style: AppTextStyles.h3.copyWith(color: AppColors.success)),
+                Text('Purchase Team',
+                    style: AppTextStyles.h3.copyWith(color: AppColors.onSurface)),
                 const SizedBox(height: 2),
-                Text('Manage procurement for your assigned sites', style: AppTextStyles.caption),
+                Text('Manage procurement for your assigned sites',
+                    style: AppTextStyles.caption),
               ],
             ),
           ),
@@ -162,14 +161,7 @@ class _SiteCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.card,
             borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-            border: Border.all(color: AppColors.divider),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.onSurface.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            border: Border.all(color: AppColors.divider, width: 1.2),
           ),
           child: Row(
             children: [

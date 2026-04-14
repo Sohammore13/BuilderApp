@@ -30,14 +30,14 @@ class BuilderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'BuilderPro',
+      title: 'SSS developers',
       debugShowCheckedModeBanner: false,
       navigatorKey: _navigatorKey,
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.light(
           primary: AppColors.primary,
-          secondary: AppColors.accent,
+          secondary: AppColors.success,
           surface: AppColors.surface,
           error: AppColors.error,
           onPrimary: AppColors.onPrimary,
@@ -231,7 +231,7 @@ class _SplashScreen extends StatelessWidget {
               height: 28,
               child: CircularProgressIndicator(
                 strokeWidth: 2.5,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               ),
             ),
           ],

@@ -20,14 +20,10 @@ class BuilderAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-<<<<<<< Updated upstream
-      backgroundColor: AppColors.surface,
-      foregroundColor: AppColors.onSurface,
-      elevation: 0,
-      centerTitle: false,
-=======
       centerTitle: true,
->>>>>>> Stashed changes
+      backgroundColor: AppColors.primary,
+      foregroundColor: AppColors.onPrimary,
+      elevation: 0,
       leading: Navigator.of(context).canPop()
           ? IconButton(
               icon: const Icon(Icons.arrow_back_ios, size: 20),
@@ -46,12 +42,6 @@ class BuilderAppBar extends StatelessWidget implements PreferredSizeWidget {
               fit: BoxFit.cover,
             ),
           ),
-<<<<<<< Updated upstream
-          const SizedBox(width: 10),
-          Text(
-            title,
-            style: AppTextStyles.h3.copyWith(color: AppColors.onSurface),
-=======
           const SizedBox(width: AppSpacing.s),
           Flexible(
             child: Text(
@@ -59,7 +49,6 @@ class BuilderAppBar extends StatelessWidget implements PreferredSizeWidget {
               style: AppTextStyles.appBarTitle,
               overflow: TextOverflow.ellipsis,
             ),
->>>>>>> Stashed changes
           ),
         ],
       ),
@@ -67,7 +56,7 @@ class BuilderAppBar extends StatelessWidget implements PreferredSizeWidget {
         ...?actions,
         if (showLogout)
           IconButton(
-            icon: const Icon(Icons.logout, color: AppColors.onSurfaceMuted),
+            icon: const Icon(Icons.logout, color: AppColors.onPrimary),
             tooltip: 'Sign Out',
             onPressed: () async {
               final confirmed = await showDialog<bool>(
@@ -133,14 +122,7 @@ class DashboardCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.card,
           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
-          border: Border.all(color: AppColors.divider, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          border: Border.all(color: AppColors.divider, width: 1.2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.screenPadding),
@@ -153,10 +135,10 @@ class DashboardCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      color: color.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
                     ),
-                    child: Icon(icon, color: color, size: 24),
+                    child: Icon(icon, color: color, size: 22),
                   ),
                   Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.onSurfaceMuted),
                 ],
@@ -204,7 +186,7 @@ class LoadingOverlay extends StatelessWidget {
       color: Colors.black54,
       child: const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppColors.accent),
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
         ),
       ),
     );
@@ -296,16 +278,16 @@ class BuilderTextField extends StatelessWidget {
         filled: true,
         fillColor: AppColors.card,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
           borderSide: const BorderSide(color: AppColors.divider),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
           borderSide: const BorderSide(color: AppColors.divider),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderRadius: BorderRadius.circular(AppSpacing.borderRadius),
+          borderSide: const BorderSide(color: AppColors.success, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -352,9 +334,10 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: (isLoading || onPressed == null) ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: color ?? AppColors.primary,
+          backgroundColor: color ?? AppColors.success,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: (color ?? AppColors.primary).withValues(alpha: 0.5),
+          disabledBackgroundColor:
+              (color ?? AppColors.success).withValues(alpha: 0.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppSpacing.borderRadius)),
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.m),
@@ -448,5 +431,39 @@ class SecondaryButton extends StatelessWidget {
       return SizedBox(width: double.infinity, height: height ?? 52, child: button);
     }
     return button;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Status Badge
+// ---------------------------------------------------------------------------
+class AppStatusBadge extends StatelessWidget {
+  final String label;
+  final AppTone tone;
+
+  const AppStatusBadge({
+    super.key,
+    required this.label,
+    required this.tone,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: tone.background,
+        borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
+        border: Border.all(color: tone.border()),
+      ),
+      child: Text(
+        label,
+        style: AppTextStyles.label.copyWith(
+          color: tone.foreground,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
+      ),
+    );
   }
 }

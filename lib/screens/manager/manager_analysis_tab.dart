@@ -4,6 +4,7 @@ import '../../constants.dart';
 import '../../services/firestore_service.dart';
 import '../../models/user_model.dart';
 import '../../models/site_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ManagerAnalysisTab extends StatefulWidget {
   const ManagerAnalysisTab({super.key});
@@ -20,9 +21,9 @@ class _ManagerAnalysisTabState extends State<ManagerAnalysisTab> {
   List<UserModel> _allUsers = [];
   List<SiteModel> _allSites = [];
   // date -> list of UIDs present on that date (across ALL sites)
-  Map<String, Set<String>> _globalAttendance = {};
+  final Map<String, Set<String>> _globalAttendance = {};
   // uid -> list of site names present on a specific date (for detail view if needed)
-  Map<String, Map<String, Set<String>>> _userSiteAttendance = {};
+  final Map<String, Map<String, Set<String>>> _userSiteAttendance = {};
 
   @override
   void initState() {
@@ -35,23 +36,35 @@ class _ManagerAnalysisTabState extends State<ManagerAnalysisTab> {
     setState(() => _loading = true);
 
     try {
-      // 1. Fetch relevant users
-      final engineers = await _firestoreService.getUsersByRole('site_engineer');
-      final purchaseTeam = await _firestoreService.getUsersByRole('purchase_team');
-      _allUsers = [...engineers, ...purchaseTeam];
+      final uid = FirebaseAuth.instance.currentUser!.uid;
 
-      // 2. Fetch all sites
-      // We use a simplified stream-to-future for loading
-      final sitesSnapshot = await _firestoreService.streamSitesForOwner('').first;
+      // 1. Fetch only sites created by this manager
+      final sitesSnapshot =
+          await _firestoreService.streamSitesForManager(uid).first;
       _allSites = sitesSnapshot;
 
-      // 3. Fetch attendance for all sites
+      // 2. Derive relevant users from those sites
+      final Set<String> relevantUids = {};
+      for (final site in _allSites) {
+        relevantUids.addAll(site.assignedEngineers);
+        relevantUids.addAll(site.assignedPurchaseTeam);
+      }
+
+      final List<UserModel> fetchedUsers = [];
+      for (final userUid in relevantUids) {
+        final user = await _firestoreService.getUser(userUid);
+        if (user != null) fetchedUsers.add(user);
+      }
+      _allUsers = fetchedUsers;
+
+      // 3. Fetch attendance for those sites
       _globalAttendance.clear();
       _userSiteAttendance.clear();
 
       for (final site in _allSites) {
         final engAtt = await _firestoreService.getAttendanceForSite(site.siteId);
-        final purAtt = await _firestoreService.getPurchaseAttendanceForSite(site.siteId);
+        final purAtt =
+            await _firestoreService.getPurchaseAttendanceForSite(site.siteId);
 
         _mergeAttendance(engAtt, site.siteName);
         _mergeAttendance(purAtt, site.siteName);
@@ -76,9 +89,6 @@ class _ManagerAnalysisTabState extends State<ManagerAnalysisTab> {
     });
   }
 
-  List<UserModel> get _filteredUsers {
-    return _allUsers;
-  }
 
   int _getPresentDays(String uid, DateTime month) {
     int count = 0;

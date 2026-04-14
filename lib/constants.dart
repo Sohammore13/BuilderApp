@@ -21,96 +21,111 @@ const String kRolePurchaseTeam = 'purchase_team';
 const String kRoleManager = 'manager';
 
 // ---------------------------------------------------------------------------
-// Color palette  (Deep Navy + Safety Orange for a commercial look)
+// Color palette (Slate + Green Professional Palette)
 // ---------------------------------------------------------------------------
 class AppColors {
   AppColors._();
 
-  static const Color primary = Color(0xFFE53935);
-  static const Color primaryLight = Color(0xFFEF5350);
-  static const Color primaryDark = Color(0xFFC62828);
-  static const Color primaryTint = Color(0xFFFFEBEE);
-  static const Color accent = Color(0xFF1A1A1A);
-  static const Color accentLight = Color(0xFF37474F);
+  // Brand Colors
+  static const Color primary = Color(0xFF2F3E46); // Dark Blue-Grey (Slate)
+  static const Color primaryLight = Color(0xFF52796F);
+  static const Color primaryDark = Color(0xFF252F35);
+  static const Color primaryTint = Color(0xFFE9ECEF);
+  
+  // Action/Functional Colors
+  static const Color success = Color(0xFF1F8F5F); // Deep Green
+  static const Color successSurface = Color(0xFFE6F4EA); // Light Green Tint
+  
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color warningSurface = Color(0xFFFEF3C7);
+  
+  static const Color error = Color(0xFFDC2626);
+  static const Color errorSurface = Color(0xFFFEE2E2);
+  
+  static const Color info = Color(0xFF3B82F6);
+  static const Color infoSurface = Color(0xFFDBEAFE);
+
+  // Surface & Text Colors
+  static const Color background = Color(0xFFF5F6F7); // Light Grey
   static const Color surface = Color(0xFFFFFFFF);
-  static const Color background = Color(0xFFF5F5F5);
   static const Color card = Color(0xFFFFFFFF);
+  static const Color divider = Color(0xFFE5E7EB); // Light Grey Border
+
   static const Color onPrimary = Color(0xFFFFFFFF);
-  static const Color onSurface = Color(0xFF1A1A1A);
-  static const Color onSurfaceMuted = Color(0xFF78909C);
-  static const Color success = Color(0xFF388E3C);
-  static const Color warning = Color(0xFFF57C00);
-  static const Color error = Color(0xFFD32F2F);
-  static const Color divider = Color(0xFFEEEEEE);
+  static const Color onSurface = Color(0xFF1F2937); // Dark Grey
+  static const Color onSurfaceMuted = Color(0xFF6B7280); // Muted Grey
 }
 
 // ---------------------------------------------------------------------------
-// Text styles
+// Text styles (Inter for a modern, professional look)
 // ---------------------------------------------------------------------------
 class AppTextStyles {
   AppTextStyles._();
 
-  static TextStyle h1 = GoogleFonts.raleway(
-    fontSize: 32,
+  static TextStyle h1 = GoogleFonts.inter(
+    fontSize: 28,
     fontWeight: FontWeight.w700,
-    color: AppColors.onSurface,
-    letterSpacing: -1.0,
-  );
-
-  static TextStyle h2 = GoogleFonts.raleway(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
     color: AppColors.onSurface,
     letterSpacing: -0.5,
   );
 
-  static TextStyle h3 = GoogleFonts.raleway(
-    fontSize: 20,
+  static TextStyle h2 = GoogleFonts.inter(
+    fontSize: 22,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurface,
   );
 
-  static TextStyle h4 = GoogleFonts.raleway(
+  static TextStyle h3 = GoogleFonts.inter(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     color: AppColors.onSurface,
   );
 
-  static TextStyle bodyLg = GoogleFonts.nunito(
+  static TextStyle h4 = GoogleFonts.inter(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    color: AppColors.onSurface,
+  );
+
+  static TextStyle appBarTitle = GoogleFonts.inter(
+    fontSize: 17,
+    fontWeight: FontWeight.w600,
+    color: AppColors.onPrimary,
+    letterSpacing: 0.1,
+  );
+
+  static TextStyle bodyLg = GoogleFonts.inter(
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: AppColors.onSurface,
   );
 
-  static TextStyle body = GoogleFonts.nunito(
+  static TextStyle body = GoogleFonts.inter(
     fontSize: 14,
     fontWeight: FontWeight.w400,
     color: AppColors.onSurface,
     height: 1.5,
   );
 
-  static TextStyle caption = GoogleFonts.nunito(
+  static TextStyle caption = GoogleFonts.inter(
     fontSize: 12,
     fontWeight: FontWeight.w400,
     color: AppColors.onSurfaceMuted,
   );
 
-  static TextStyle label = GoogleFonts.nunito(
+  static TextStyle label = GoogleFonts.inter(
     fontSize: 13,
     fontWeight: FontWeight.w500,
     color: AppColors.onSurfaceMuted,
-    letterSpacing: 0.5,
+    letterSpacing: 0.2,
   );
   
-  static TextStyle button = GoogleFonts.raleway(
+  static TextStyle button = GoogleFonts.inter(
     fontSize: 15,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
     color: Colors.white,
-    letterSpacing: 0.5,
   );
 }
-<<<<<<< Updated upstream
-=======
 
 // ---------------------------------------------------------------------------
 // Spacing & Layout
@@ -195,4 +210,3 @@ AppTone roleTone(String role) {
       return AppTones.primary;
   }
 }
->>>>>>> Stashed changes

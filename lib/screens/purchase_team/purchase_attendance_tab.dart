@@ -19,10 +19,6 @@ class _PurchaseAttendanceTabState extends State<PurchaseAttendanceTab> {
   String get _uid => FirebaseAuth.instance.currentUser!.uid;
 
   bool _loading = true;
-<<<<<<< Updated upstream
-  bool _checkingToday = true;
-=======
->>>>>>> Stashed changes
   bool _markedToday = false;
   bool _marking = false;
 
@@ -152,82 +148,14 @@ class _PurchaseAttendanceTabState extends State<PurchaseAttendanceTab> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-<<<<<<< Updated upstream
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.success.withValues(alpha: 0.25)),
-=======
               borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
               border: Border.all(
                 color: (_markedToday ? AppColors.success : AppColors.warning)
                     .withValues(alpha: 0.2),
               ),
->>>>>>> Stashed changes
             ),
             child: Column(
               children: [
-<<<<<<< Updated upstream
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.success.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.today, color: AppColors.success, size: 20),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("Today's Attendance", style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w600)),
-                        Text(_todayKey, style: AppTextStyles.caption),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                if (_markedToday)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.check_circle, color: AppColors.success, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Attendance marked for today',
-                          style: AppTextStyles.body.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  )
-                else
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      icon: _marking
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Icon(Icons.how_to_reg_outlined, size: 20),
-                      label: Text(_marking ? 'Marking...' : 'Mark Present'),
-                      onPressed: _marking ? null : _markAttendance,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.success,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 13),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                    ),
-=======
                 Icon(
                   _markedToday ? Icons.check_circle_outline : Icons.schedule_outlined,
                   size: 44,
@@ -241,7 +169,6 @@ class _PurchaseAttendanceTabState extends State<PurchaseAttendanceTab> {
                   style: AppTextStyles.h3.copyWith(
                     color: _markedToday ? AppColors.success : AppColors.warning,
                     fontWeight: FontWeight.w700,
->>>>>>> Stashed changes
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -293,11 +220,7 @@ class _PurchaseAttendanceTabState extends State<PurchaseAttendanceTab> {
               return Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.s),
                 child: Container(
-<<<<<<< Updated upstream
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-=======
                   padding: const EdgeInsets.all(AppSpacing.cardPadding),
->>>>>>> Stashed changes
                   decoration: BoxDecoration(
                     color: AppColors.card,
                     borderRadius: BorderRadius.circular(AppSpacing.borderRadiusLg),
@@ -308,15 +231,6 @@ class _PurchaseAttendanceTabState extends State<PurchaseAttendanceTab> {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-<<<<<<< Updated upstream
-                          color: (isPresent ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          isPresent ? Icons.check_circle_outline : Icons.cancel_outlined,
-                          size: 18,
-                          color: isPresent ? AppColors.success : AppColors.error,
-=======
                           color:
                               (isPresent ? AppColors.success : AppColors.error)
                                   .withValues(alpha: 0.1),
@@ -330,15 +244,10 @@ class _PurchaseAttendanceTabState extends State<PurchaseAttendanceTab> {
                           color: isPresent
                               ? AppColors.success
                               : AppColors.error,
->>>>>>> Stashed changes
                         ),
                       ),
                       const SizedBox(width: AppSpacing.m),
                       Expanded(
-<<<<<<< Updated upstream
-                        child: Text(date,
-                            style: AppTextStyles.body.copyWith(fontWeight: FontWeight.w500)),
-=======
                         child: Text(
                           date,
                           style: AppTextStyles.body.copyWith(
@@ -346,35 +255,23 @@ class _PurchaseAttendanceTabState extends State<PurchaseAttendanceTab> {
                             fontSize: 13,
                           ),
                         ),
->>>>>>> Stashed changes
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-<<<<<<< Updated upstream
-                          color: (isPresent ? AppColors.success : AppColors.error).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-=======
                           color:
                               (isPresent ? AppColors.success : AppColors.error)
                                   .withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSm),
->>>>>>> Stashed changes
                         ),
                         child: Text(
                           isPresent ? 'PRESENT' : 'ABSENT',
                           style: AppTextStyles.caption.copyWith(
-<<<<<<< Updated upstream
-                            color: isPresent ? AppColors.success : AppColors.error,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 11,
-=======
                             color: isPresent
                                 ? AppColors.success
                                 : AppColors.error,
                             fontWeight: FontWeight.bold,
                             fontSize: 10,
->>>>>>> Stashed changes
                           ),
                         ),
                       ),
