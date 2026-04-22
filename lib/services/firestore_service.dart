@@ -581,4 +581,69 @@ class FirestoreService {
           'status': 'pending_approval',
         });
   }
+
+  // ===========================================================================
+  // EXPENDITURES — expenditures/{siteId}/entries/{entryId}
+  // ===========================================================================
+
+  /// Add a raw material expenditure entry for a site
+  Future<void> addExpenditure({
+    required String siteId,
+    required String category,
+    required double quantity,
+    required String unit,
+    required double cost,
+    required String date,
+    required String addedBy,
+    String notes = '',
+  }) async {
+    await _db
+        .collection('expenditures')
+        .doc(siteId)
+        .collection('entries')
+        .add({
+          'siteId': siteId,
+          'category': category,
+          'quantity': quantity,
+          'unit': unit,
+          'cost': cost,
+          'date': date,
+          'addedBy': addedBy,
+          'notes': notes,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+  }
+
+  /// Real-time stream of all expenditure entries for a site, newest first
+  Stream<QuerySnapshot> streamExpendituresForSite(String siteId) {
+    return _db
+        .collection('expenditures')
+        .doc(siteId)
+        .collection('entries')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+  }
+
+  /// One-time fetch of all expenditure entries for a site
+  Future<QuerySnapshot> getExpendituresForSite(String siteId) async {
+    return _db
+        .collection('expenditures')
+        .doc(siteId)
+        .collection('entries')
+        .orderBy('createdAt', descending: true)
+        .get();
+  }
+
+  /// Delete a single expenditure entry
+  Future<void> deleteExpenditure({
+    required String siteId,
+    required String entryId,
+  }) async {
+    await _db
+        .collection('expenditures')
+        .doc(siteId)
+        .collection('entries')
+        .doc(entryId)
+        .delete();
+  }
 }

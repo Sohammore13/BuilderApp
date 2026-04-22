@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../../constants.dart';
 import 'engineer_attendance_tab.dart';
 import 'engineer_announcements_tab.dart';
-import 'engineer_material_requests_tab.dart'; // [ADDED]
+import 'engineer_material_requests_tab.dart';
+import 'engineer_expenditure_tab.dart';
 
 class EngineerSiteDetailScreen extends StatelessWidget {
   final String siteId;
@@ -17,7 +18,7 @@ class EngineerSiteDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3, // [CHANGED] 2 to 3
+      length: 4,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
@@ -70,6 +71,7 @@ class EngineerSiteDetailScreen extends StatelessWidget {
               Tab(text: 'Attendance'),
               Tab(text: 'Announcements'),
               Tab(text: 'Materials'),
+              Tab(text: 'Expenditure'),
             ],
           ),
         ),
@@ -77,7 +79,8 @@ class EngineerSiteDetailScreen extends StatelessWidget {
           children: [
             EngineerAttendanceTab(siteId: siteId),
             EngineerAnnouncementsTab(siteId: siteId),
-            EngineerMaterialRequestsTab(siteId: siteId), // [ADDED]
+            EngineerMaterialRequestsTab(siteId: siteId),
+            EngineerExpenditureTab(siteId: siteId),
           ],
         ),
       ),

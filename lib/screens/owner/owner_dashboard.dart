@@ -6,6 +6,7 @@ import '../../services/firestore_service.dart';
 import '../../models/site_model.dart';
 import 'owner_site_detail.dart';
 import 'owner_purchase_orders_tab.dart';
+import 'owner_analytics_tab.dart';
 
 class OwnerDashboard extends StatefulWidget {
   const OwnerDashboard({super.key});
@@ -24,9 +25,11 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
 
     final pages = [
       // Tab 1: Purchase Approvals (Global)
-      const OwnerPurchaseOrdersTab(), // No siteId needed, it's global now
+      const OwnerPurchaseOrdersTab(),
       // Tab 2: View Sites (Read Only)
       _ViewSitesTab(firestoreService: firestoreService, uid: uid),
+      // Tab 3: Analytics
+      const OwnerAnalyticsTab(),
     ];
 
     return Scaffold(
@@ -46,6 +49,11 @@ class _OwnerDashboardState extends State<OwnerDashboard> {
             icon: Icon(Icons.business_outlined),
             selectedIcon: Icon(Icons.business),
             label: 'View Sites',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.analytics_outlined),
+            selectedIcon: Icon(Icons.analytics),
+            label: 'Analytics',
           ),
         ],
       ),

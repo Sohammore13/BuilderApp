@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return isSignedIn() && request.auth.uid == 'BXn7yDKDixMiGrDhwXHjYDrcMcz2';
+    }
+
+    function isManager() {
+      return isSignedIn() && request.auth.uid == 'kMCReLyAE8fEqIrG1MUq3S6gnlu1';
+    }
+
+    function getRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isSiteEngineer() {
+      return isSignedIn() && getRole() == 'site_engineer';
+    }
+
+    function isPurchaseTeam() {
+      return isSignedIn() && getRole() == 'purchase_team';
+    }
+
+    function isAssignedEngineer(siteId) {
+      return isSignedIn() && request.auth.uid in
+        get(/databases/$(database)/documents/sites/$(siteId)).data.assignedEngineers;
+    }
+
+    function isAssignedPurchase(siteId) {
+      return isSignedIn() && request.auth.uid in
+        get(/databases/$(database)/documents/sites/$(siteId)).data.assignedPurchaseTeam;
+    }
+
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if isOwner() || isManager() || request.auth.uid == uid;
+      allow delete: if isOwner();
+    }
+
+    match /sites/{siteId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isManager();
+    }
+
+    match /{path=**}/engineers/{uid} {
+      allow read: if isSignedIn();
+    }
+    match /{path=**}/purchase/{uid} {
+      allow read: if isSignedIn();
+    }
+
+    match /attendance/{siteId}/records/{date}/engineers/{uid} {
+      allow read: if isOwner() || isManager() || isAssignedEngineer(siteId);
+      allow create, update: if isSignedIn() && request.auth.uid == uid && isAssignedEngineer(siteId);
+      allow delete: if false;
+    }
+
+    match /attendance/{siteId}/records/{date}/purchase/{uid} {
+      allow read: if isOwner() || isManager() || isAssignedPurchase(siteId);
+      allow create, update: if isSignedIn() && request.auth.uid == uid && isAssignedPurchase(siteId);
+      allow delete: if false;
+    }
+
+    match /announcements/{siteId}/posts/{postId} {
+      allow read: if isSignedIn();
+      allow create, delete: if isManager() || isOwner();
+      allow update: if false;
+    }
+
+    match /purchaseOrders/{siteId}/orders/{orderId} {
+      allow read: if isSignedIn();
+      allow create: if isAssignedEngineer(siteId) || isAssignedPurchase(siteId);
+      allow update: if isOwner() || isAssignedPurchase(siteId);
+      allow delete: if false;
+    }
+
+    match /{path=**}/requests/{requestId} {
+      allow read: if isOwner() || isManager() || isSignedIn();
+      allow update: if isOwner() || isSignedIn();
+    }
+
+    match /materialRequests/{siteId}/requests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isAssignedEngineer(siteId);
+      allow update: if isOwner() || isAssignedPurchase(siteId);
+      allow delete: if false;
+    }
+
+    match /expenditures/{siteId}/entries/{entryId} {
+      allow read: if isOwner() || isManager() || isAssignedEngineer(siteId) || isAssignedPurchase(siteId);
+      allow create: if isAssignedEngineer(siteId);
+      allow delete: if isOwner() || isManager() || isAssignedEngineer(siteId);
+      allow update: if false;
+    }
+  }
+}

@@ -3,6 +3,7 @@ import '../../constants.dart';
 import 'purchase_orders_tab.dart';
 import 'purchase_announcements_tab.dart';
 import 'purchase_attendance_tab.dart';
+import '../site_engineer/engineer_expenditure_tab.dart';
 
 class PurchaseSiteDetailScreen extends StatelessWidget {
   final String siteId;
@@ -17,7 +18,7 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
@@ -70,6 +71,7 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
               Tab(text: 'Requirements'),
               Tab(text: 'Announcements'),
               Tab(text: 'Attendance'),
+              Tab(text: 'Expenditure'),
             ],
           ),
         ),
@@ -78,6 +80,7 @@ class PurchaseSiteDetailScreen extends StatelessWidget {
             PurchaseOrdersTab(siteId: siteId),
             PurchaseAnnouncementsTab(siteId: siteId),
             PurchaseAttendanceTab(siteId: siteId),
+            EngineerExpenditureTab(siteId: siteId),
           ],
         ),
       ),
